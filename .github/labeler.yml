@@ -1,0 +1,11 @@
+package: 
+  - "package.json"
+
+github:
+  - ".github/**/*"
+
+wip:
+  - "**/*"
+  
+md:
+  - "README.md"
