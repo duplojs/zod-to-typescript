@@ -6,6 +6,7 @@ import "./typescriptTransformators/unknown";
 import "./typescriptTransformators/never";
 import "./typescriptTransformators/enum";
 import "./typescriptTransformators/string";
+import "./typescriptTransformators/number";
 
 export * from "./zodTypescriptTransformator";
 
