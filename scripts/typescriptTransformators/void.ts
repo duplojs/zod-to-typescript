@@ -8,9 +8,6 @@ export class ZodVoidTypescriptTrasformator extends ZodTypescriptTransformator {
 	}
 
 	public makeTypeNode(): TypeNode {
-		return factory.createUnionTypeNode([
-			factory.createKeywordTypeNode(SyntaxKind.VoidKeyword),
-			factory.createKeywordTypeNode(SyntaxKind.UndefinedKeyword),
-		]);
+		return factory.createKeywordTypeNode(SyntaxKind.VoidKeyword);
 	}
 }

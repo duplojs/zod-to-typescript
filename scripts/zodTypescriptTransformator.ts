@@ -50,11 +50,13 @@ export abstract class ZodTypescriptTransformator {
 	public static findTypescriptTransformator(
 		zodSchema: ZodType,
 		context: MapContext,
-	): TypeNode | TypeAliasDeclaration {
-		const { node } = context.get(zodSchema) ?? {};
+	): TypeNode {
+		const { name } = context.get(zodSchema) ?? {};
 
-		if (node) {
-			return node;
+		if (name) {
+			return factory.createTypeReferenceNode(
+				factory.createIdentifier(name),
+			);
 		}
 
 		for (const typescriptTransformator of this.typescriptTransformators) {
@@ -134,9 +136,9 @@ export abstract class ZodTypescriptTransformator {
 		this.zod = zod;
 	}
 
-	public static autoInstance(ZodTypescriptTransformator: new() => ZodTypescriptTransformator) {
-		// @ts-expect-error - This is a hack to make sure the static array is populated
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-		ZodTypescriptTransformator.typescriptTransformators.push(new ZodTypescriptTransformator());
+	public static autoInstance(ZodTypeTypescriptTransformator: new() => ZodTypescriptTransformator) {
+		ZodTypescriptTransformator
+			.typescriptTransformators
+			.push(new ZodTypeTypescriptTransformator());
 	}
 }

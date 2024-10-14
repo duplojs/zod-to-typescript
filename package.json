@@ -1,5 +1,5 @@
 {
-  "name": "@duplojs/core",
+  "name": "@duplojs/zod-to-typescript",
   "version": "0.0.0",
   "author": "duplojs",
   "contributors": [
