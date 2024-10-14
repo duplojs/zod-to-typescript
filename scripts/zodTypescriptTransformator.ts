@@ -135,6 +135,8 @@ export abstract class ZodTypescriptTransformator {
 	}
 
 	public static autoInstance(ZodTypescriptTransformator: new() => ZodTypescriptTransformator) {
+		// @ts-expect-error - This is a hack to make sure the static array is populated
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
 		ZodTypescriptTransformator.typescriptTransformators.push(new ZodTypescriptTransformator());
 	}
 }

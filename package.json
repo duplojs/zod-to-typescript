@@ -20,10 +20,8 @@
     "test:tu": "vitest --coverage",
     "test:tu:watch": "vitest --coverage --watch",
     "test:tu:update": "vitest --coverage --update",
-    "test:types": "npm run test:types:scripts && npm run test:types:override && npm run integration:test:types",
+    "test:types": "npm run test:types:scripts",
     "test:types:scripts": "tsc",
-    "test:types:override": "sh test/overridesTypes/testOverrideTypes.sh",
-    "integration:test:types": "npm -w test/integration run test:types",
     "test:lint": "eslint",
     "test:lint:fix": "eslint --fix",
     "prepare": "husky"

@@ -18,6 +18,8 @@ export default defineConfig({
 			tsconfig: "tsconfig.build.json",
 			include: /\.[jt]sx?$/,
 			exclude: /node_modules/,
+			experimentalDecorators: true,
+			emitDecoratorMetadata: true,
 		}),
 	],
 });
