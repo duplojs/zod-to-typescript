@@ -11,6 +11,7 @@ import "./typescriptTransformators/bigint";
 import "./typescriptTransformators/boolean";
 import "./typescriptTransformators/date";
 import "./typescriptTransformators/array";
+import "./typescriptTransformators/union";
 
 export * from "./zodTypescriptTransformator";
 
