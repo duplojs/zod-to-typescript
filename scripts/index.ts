@@ -12,6 +12,7 @@ import "./typescriptTransformators/boolean";
 import "./typescriptTransformators/date";
 import "./typescriptTransformators/array";
 import "./typescriptTransformators/union";
+import "./typescriptTransformators/object";
 
 export * from "./zodTypescriptTransformator";
 
