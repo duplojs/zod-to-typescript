@@ -1,4 +1,4 @@
-import { type ZodType, z as zod } from "zod";
+import { ZodType, z as zod } from "zod";
 import ts, { type TypeNode, type TypeAliasDeclaration, factory } from "typescript";
 
 export type MapContext = Map<ZodType, TypeAliasDeclaration>;
@@ -16,7 +16,7 @@ export interface MakeContextOptions {
 export interface ConvertOptions {
 	name?: string;
 	context?: MapContext;
-	indentifiers?: ConvertIdentifier[];
+	indentifiers?: (ConvertIdentifier | ZodType)[];
 }
 
 export abstract class ZodTypescriptTransformator {
@@ -86,14 +86,22 @@ export abstract class ZodTypescriptTransformator {
 
 		if (options.indentifiers) {
 			options.indentifiers.forEach((indentifier) => {
-				if (indentifier.zodSchema === zodSchema) {
+				const currentZodSchema = indentifier instanceof ZodType
+					? indentifier
+					: indentifier.zodSchema;
+
+				const currentName = indentifier instanceof ZodType
+					? this.getIdentifier()
+					: indentifier.name;
+
+				if (currentZodSchema === zodSchema) {
 					return;
 				}
 
 				const localContext = this.makeContext(
-					indentifier.zodSchema,
+					currentZodSchema,
 					{
-						name: indentifier.name,
+						name: currentName,
 						context: baseContext,
 					},
 				);
@@ -114,8 +122,7 @@ export abstract class ZodTypescriptTransformator {
 	}
 
 	public static getIdentifier() {
-		this.count++;
-		return `Zod2ts_${this.count.toString(36)}_duplojs`;
+		return `Zod2ts_${(this.count++).toString(36)}_duplojs`;
 	}
 
 	public static injectZod<
