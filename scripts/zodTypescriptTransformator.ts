@@ -1,12 +1,7 @@
 import { type ZodType, z as zod } from "zod";
 import ts, { type TypeNode, type TypeAliasDeclaration, factory } from "typescript";
 
-export interface MapContextValue {
-	node: TypeAliasDeclaration | TypeNode;
-	name: string;
-}
-
-export type MapContext = Map<ZodType, MapContextValue>;
+export type MapContext = Map<ZodType, TypeAliasDeclaration>;
 
 export interface ConvertIdentifier {
 	zodSchema: ZodType;
@@ -40,7 +35,7 @@ export abstract class ZodTypescriptTransformator {
 		const printer = ts.createPrinter();
 
 		return [...context.values()]
-			.map((value) => printer.printNode(ts.EmitHint.Unspecified, value.node, sourceFile))
+			.map((nodeAlias) => printer.printNode(ts.EmitHint.Unspecified, nodeAlias, sourceFile))
 			.reduce(
 				(pv, cv) => pv + cv,
 				"",
@@ -51,11 +46,11 @@ export abstract class ZodTypescriptTransformator {
 		zodSchema: ZodType,
 		context: MapContext,
 	): TypeNode {
-		const { name } = context.get(zodSchema) ?? {};
+		const nodeAlias = context.get(zodSchema);
 
-		if (name) {
+		if (nodeAlias) {
 			return factory.createTypeReferenceNode(
-				factory.createIdentifier(name),
+				factory.createIdentifier(nodeAlias.name.text),
 			);
 		}
 
@@ -71,23 +66,16 @@ export abstract class ZodTypescriptTransformator {
 	public static makeContext(zodSchema: ZodType, options: MakeContextOptions): MapContext {
 		const context = new Map(options.context);
 
-		const result = this.findTypescriptTransformator(zodSchema, context);
-
-		const node = "type" in result
-			? result
-			: factory.createTypeAliasDeclaration(
-				undefined,
-				factory.createIdentifier(options.name),
-				undefined,
-				result,
-			);
+		const nodeType = this.findTypescriptTransformator(zodSchema, context);
 
 		context.set(
 			zodSchema,
-			{
-				name: options.name,
-				node,
-			},
+			factory.createTypeAliasDeclaration(
+				undefined,
+				factory.createIdentifier(options.name),
+				undefined,
+				nodeType,
+			),
 		);
 
 		return context;
