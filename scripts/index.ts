@@ -7,6 +7,7 @@ import "./typescriptTransformators/never";
 import "./typescriptTransformators/enum";
 import "./typescriptTransformators/string";
 import "./typescriptTransformators/number";
+import "./typescriptTransformators/bigint";
 
 export * from "./zodTypescriptTransformator";
 
