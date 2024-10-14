@@ -10,6 +10,7 @@ import "./typescriptTransformators/number";
 import "./typescriptTransformators/bigint";
 import "./typescriptTransformators/boolean";
 import "./typescriptTransformators/date";
+import "./typescriptTransformators/array";
 
 export * from "./zodTypescriptTransformator";
 
