@@ -23,6 +23,7 @@ import "./typescriptTransformators/nativeEnum";
 import "./typescriptTransformators/map";
 import "./typescriptTransformators/intersection";
 import "./typescriptTransformators/function";
+import "./typescriptTransformators/effects";
 
 export * from "./zodTypescriptTransformator";
 
