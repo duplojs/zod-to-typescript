@@ -20,6 +20,7 @@ import "./typescriptTransformators/promise";
 import "./typescriptTransformators/optional";
 import "./typescriptTransformators/nullable";
 import "./typescriptTransformators/nativeEnum";
+import "./typescriptTransformators/map";
 
 export * from "./zodTypescriptTransformator";
 
