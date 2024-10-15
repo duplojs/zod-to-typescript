@@ -25,6 +25,7 @@ import "./typescriptTransformators/intersection";
 import "./typescriptTransformators/function";
 import "./typescriptTransformators/effects";
 import "./typescriptTransformators/discriminatedUnion";
+import "./typescriptTransformators/default";
 
 export * from "./zodTypescriptTransformator";
 
