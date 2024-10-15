@@ -17,6 +17,7 @@ import "./typescriptTransformators/tuple";
 import "./typescriptTransformators/set";
 import "./typescriptTransformators/record";
 import "./typescriptTransformators/promise";
+import "./typescriptTransformators/optional";
 
 export * from "./zodTypescriptTransformator";
 
