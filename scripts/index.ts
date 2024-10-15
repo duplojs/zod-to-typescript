@@ -15,6 +15,7 @@ import "./typescriptTransformators/union";
 import "./typescriptTransformators/object";
 import "./typescriptTransformators/tuple";
 import "./typescriptTransformators/set";
+import "./typescriptTransformators/record";
 
 export * from "./zodTypescriptTransformator";
 
