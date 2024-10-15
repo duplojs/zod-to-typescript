@@ -13,6 +13,7 @@ import "./typescriptTransformators/date";
 import "./typescriptTransformators/array";
 import "./typescriptTransformators/union";
 import "./typescriptTransformators/object";
+import "./typescriptTransformators/tuple";
 
 export * from "./zodTypescriptTransformator";
 
