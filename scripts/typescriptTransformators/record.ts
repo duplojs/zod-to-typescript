@@ -1,6 +1,6 @@
 import { type MapContext, ZodTypescriptTransformator } from "@scripts/zodTypescriptTransformator";
 import { type TypeNode, factory } from "typescript";
-import type { ZodRecord, ZodType, ZodString, ZodNumber, ZodSymbol } from "zod";
+import type { ZodRecord, ZodType } from "zod";
 
 @ZodTypescriptTransformator.autoInstance
 export class ZodRecordTypescriptTrasformator extends ZodTypescriptTransformator {
@@ -9,7 +9,7 @@ export class ZodRecordTypescriptTrasformator extends ZodTypescriptTransformator 
 	}
 
 	public makeTypeNode(
-		zodSchema: ZodRecord<ZodString | ZodNumber | ZodSymbol, ZodType>,
+		zodSchema: ZodRecord<ZodType<keyof any>, ZodType>,
 		context: MapContext,
 	): TypeNode {
 		return factory.createTypeReferenceNode(

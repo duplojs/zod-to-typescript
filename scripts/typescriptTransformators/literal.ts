@@ -12,11 +12,7 @@ export class ZodLiteralTypescriptTransformator extends ZodTypescriptTransformato
 		const value = zodSchema._def.value;
 		const valueType = typeof value;
 
-		if (valueType in ZodLiteralTypescriptTransformator.litteralMapper) {
-			return ZodLiteralTypescriptTransformator.litteralMapper[valueType](value as never);
-		}
-
-		return ZodLiteralTypescriptTransformator.litteralMapper.function();
+		return ZodLiteralTypescriptTransformator.litteralMapper[valueType](value as never);
 	}
 
 	public static litteralMapper = {
@@ -29,6 +25,6 @@ export class ZodLiteralTypescriptTransformator extends ZodTypescriptTransformato
 		symbol: (value: symbol) => factory.createLiteralTypeNode(factory.createStringLiteral(value.toString())),
 		object: () => factory.createLiteralTypeNode(factory.createNull()),
 		undefined: () => factory.createKeywordTypeNode(SyntaxKind.UndefinedKeyword),
-		function: () => factory.createKeywordTypeNode(SyntaxKind.UndefinedKeyword),
+		function: () => factory.createKeywordTypeNode(SyntaxKind.UnknownKeyword),
 	};
 }

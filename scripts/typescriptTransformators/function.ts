@@ -18,6 +18,7 @@ export class ZodFunctionTypescriptTrasformator extends ZodTypescriptTransformato
 				ZodTypescriptTransformator.findTypescriptTransformator(arg, context),
 			),
 		);
+
 		const restArgTypes = zodSchema._def.args._def.rest
 			? [
 				factory.createParameterDeclaration(

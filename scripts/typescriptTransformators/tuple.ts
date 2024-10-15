@@ -9,10 +9,23 @@ export class ZodTupleTypescriptTrasformator extends ZodTypescriptTransformator {
 	}
 
 	public makeTypeNode(zodSchema: ZodTuple<[ZodType]>, context: MapContext): TypeNode {
-		return factory.createTupleTypeNode(
-			zodSchema.items.map(
-				(schema) => ZodTypescriptTransformator.findTypescriptTransformator(schema, context),
-			),
+		const items = zodSchema.items.map(
+			(schema) => ZodTypescriptTransformator.findTypescriptTransformator(schema, context),
 		);
+
+		const typeNodeRest = zodSchema._def.rest
+			? [
+				factory.createRestTypeNode(
+					factory.createArrayTypeNode(
+						ZodTypescriptTransformator.findTypescriptTransformator(zodSchema._def.rest, context),
+					),
+				),
+			]
+			: [];
+
+		return factory.createTupleTypeNode([
+			...items,
+			...typeNodeRest,
+		]);
 	}
 }

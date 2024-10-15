@@ -12,5 +12,14 @@ it("nativeEnum", () => {
 		zod.nativeEnum(MyEnum),
 	);
 
-	expect(result).toBe("type Zod2ts_0_duplojs = \"a\" | \"b\" | \"c\";");
+	expect(result.trim()).toBe(
+		`enum Zod2ts_1_duplojs {
+    A = "a",
+    B = "b",
+    C = "c"
+}
+
+type Zod2ts_0_duplojs = Zod2ts_0_duplojs;
+`.trim(),
+	);
 });

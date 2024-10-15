@@ -1,7 +1,7 @@
 import { ZodType, z as zod } from "zod";
-import ts, { type TypeNode, type TypeAliasDeclaration, factory } from "typescript";
+import ts, { type TypeNode, type TypeAliasDeclaration, factory, SyntaxKind, type EnumDeclaration } from "typescript";
 
-export type MapContext = Map<ZodType, TypeAliasDeclaration>;
+export type MapContext = Map<ZodType, TypeAliasDeclaration | EnumDeclaration>;
 
 export interface ConvertIdentifier {
 	zodSchema: ZodType;
@@ -36,27 +36,37 @@ export abstract class ZodTypescriptTransformator {
 
 		return [...context.values()]
 			.map((nodeAlias) => printer.printNode(ts.EmitHint.Unspecified, nodeAlias, sourceFile))
-			.reduce(
-				(pv, cv) => pv + cv,
-				"",
-			);
+			.join("\n\n")
+			.trim();
 	}
 
 	public static findTypescriptTransformator(
 		zodSchema: ZodType,
 		context: MapContext,
+		skipDeclarationStatement = false,
 	): TypeNode {
-		const nodeAlias = context.get(zodSchema);
+		const declarationStatement = context.get(zodSchema);
 
-		if (nodeAlias) {
+		if (!skipDeclarationStatement && declarationStatement) {
 			return factory.createTypeReferenceNode(
-				factory.createIdentifier(nodeAlias.name.text),
+				factory.createIdentifier(declarationStatement.name.text),
 			);
 		}
 
 		for (const typescriptTransformator of this.typescriptTransformators) {
 			if (zodSchema instanceof typescriptTransformator.support) {
-				return typescriptTransformator.makeTypeNode(zodSchema, context);
+				const typeNode = typescriptTransformator.makeTypeNode(zodSchema, context);
+
+				if (zodSchema.description) {
+					ts.addSyntheticLeadingComment(
+						typeNode,
+						SyntaxKind.MultiLineCommentTrivia,
+						`* ${zodSchema.description}`,
+						true,
+					);
+				}
+
+				return typeNode;
 			}
 		}
 
@@ -66,7 +76,19 @@ export abstract class ZodTypescriptTransformator {
 	public static makeContext(zodSchema: ZodType, options: MakeContextOptions): MapContext {
 		const context = new Map(options.context);
 
-		const nodeType = this.findTypescriptTransformator(zodSchema, context);
+		context.set(
+			zodSchema,
+			factory.createTypeAliasDeclaration(
+				undefined,
+				factory.createIdentifier(options.name),
+				undefined,
+				factory.createLiteralTypeNode(factory.createNull()),
+			),
+		);
+
+		const nodeType = this.findTypescriptTransformator(zodSchema, context, true);
+
+		context.delete(zodSchema);
 
 		context.set(
 			zodSchema,

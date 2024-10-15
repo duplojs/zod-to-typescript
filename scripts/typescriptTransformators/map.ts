@@ -9,9 +9,12 @@ export class ZodMapTypescriptTrasformator extends ZodTypescriptTransformator {
 	}
 
 	public makeTypeNode(zodSchema: ZodMap<ZodType, ZodType>, context: MapContext): TypeNode {
-		return factory.createTypeReferenceNode(factory.createIdentifier("Map"), [
-			ZodTypescriptTransformator.findTypescriptTransformator(zodSchema._def.keyType, context),
-			ZodTypescriptTransformator.findTypescriptTransformator(zodSchema._def.valueType, context),
-		]);
+		return factory.createTypeReferenceNode(
+			factory.createIdentifier("Map"),
+			[
+				ZodTypescriptTransformator.findTypescriptTransformator(zodSchema._def.keyType, context),
+				ZodTypescriptTransformator.findTypescriptTransformator(zodSchema._def.valueType, context),
+			],
+		);
 	}
 }

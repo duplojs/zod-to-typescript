@@ -4,7 +4,9 @@ import { z as zod } from "zod";
 it("tuple", () => {
 	const result = ZodTypescriptTransformator.convert(zod.tuple([zod.string(), zod.number()]));
 
-	const expected = "type Zod2ts_0_duplojs = [string, number];";
-	const received = result.replace(/\s+/g, "");
-	expect(received).toBe(expected.replace(/\s+/g, ""));
+	expect(result).toBe("type Zod2ts_0_duplojs = [\n    string,\n    number\n];");
+
+	const result1 = ZodTypescriptTransformator.convert(zod.tuple([zod.string(), zod.number()]).rest(zod.null()));
+
+	expect(result1).toBe("type Zod2ts_1_duplojs = [\n    string,\n    number,\n    ...null[]\n];");
 });

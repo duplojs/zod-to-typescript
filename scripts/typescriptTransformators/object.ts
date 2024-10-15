@@ -22,9 +22,11 @@ export class ZodObjectTypescriptTrasformator extends ZodTypescriptTransformator 
 
 	public makeTypeNode(zodSchema: ZodObject<ZodRawShape>, context: MapContext): TypeNode {
 		const properties = Object.entries(zodSchema.shape);
+
 		return factory.createTypeLiteralNode(
 			properties.map(([name, schema]: [string, ZodType]) => {
 				const keyType = ZodTypescriptTransformator.findTypescriptTransformator(schema, context);
+
 				return factory.createPropertySignature(
 					undefined,
 					name,
