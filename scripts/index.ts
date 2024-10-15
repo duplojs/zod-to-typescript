@@ -18,6 +18,7 @@ import "./typescriptTransformators/set";
 import "./typescriptTransformators/record";
 import "./typescriptTransformators/promise";
 import "./typescriptTransformators/optional";
+import "./typescriptTransformators/nullable";
 
 export * from "./zodTypescriptTransformator";
 
