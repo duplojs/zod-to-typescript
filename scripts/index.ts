@@ -22,6 +22,7 @@ import "./typescriptTransformators/nullable";
 import "./typescriptTransformators/nativeEnum";
 import "./typescriptTransformators/map";
 import "./typescriptTransformators/intersection";
+import "./typescriptTransformators/function";
 
 export * from "./zodTypescriptTransformator";
 
