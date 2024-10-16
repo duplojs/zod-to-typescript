@@ -15,7 +15,7 @@ export class ZodNativeEnumTypescriptTrasformator extends ZodTypescriptTransforma
 
 		const enumDeclarationStatement = factory.createEnumDeclaration(
 			[],
-			ZodTypescriptTransformator.getIdentifier(),
+			zodSchema._identifier ?? ZodTypescriptTransformator.getIdentifier(),
 			Object.entries(zodSchema.enum).map(
 				([key, value]) => factory.createEnumMember(
 					key,
@@ -26,7 +26,10 @@ export class ZodNativeEnumTypescriptTrasformator extends ZodTypescriptTransforma
 			),
 		);
 
-		context.set(zodNativeEnumSchema, enumDeclarationStatement);
+		context.set(
+			zodNativeEnumSchema,
+			enumDeclarationStatement,
+		);
 
 		return ZodTypescriptTransformator.findTypescriptTransformator(zodSchema, context);
 	}

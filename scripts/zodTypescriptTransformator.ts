@@ -1,7 +1,11 @@
 import { ZodType, z as zod } from "zod";
-import ts, { type TypeNode, type TypeAliasDeclaration, factory, SyntaxKind, type EnumDeclaration } from "typescript";
+import ts, { type TypeNode, factory, SyntaxKind, type JSDocContainer, type Declaration, type Identifier } from "typescript";
 
-export type MapContext = Map<ZodType, TypeAliasDeclaration | EnumDeclaration>;
+export interface NamedDeclaration extends Declaration, JSDocContainer {
+	readonly name: Identifier;
+}
+
+export type MapContext = Map<ZodType, NamedDeclaration>;
 
 export interface ConvertIdentifier {
 	zodSchema: ZodType;
@@ -17,7 +21,22 @@ export interface ConvertOptions {
 	name?: string;
 	context?: MapContext;
 	indentifiers?: (ConvertIdentifier | ZodType)[];
+	export?: boolean;
 }
+
+declare module "zod" {
+	interface ZodType {
+		_identifier?: string;
+
+		identifier(name: string): this;
+	}
+}
+
+ZodType.prototype.identifier = function(name) {
+	this._identifier = name;
+
+	return this;
+};
 
 export abstract class ZodTypescriptTransformator {
 	public abstract get support(): new (...args: any[]) => ZodType;
@@ -30,12 +49,38 @@ export abstract class ZodTypescriptTransformator {
 
 	private static count = 0;
 
-	public static contextToTypeInString(context: MapContext): string {
+	public static contextToTypeInString(context: MapContext, exportType = false): string {
 		const sourceFile = ts.createSourceFile("print.ts", "", ts.ScriptTarget.Latest, false, ts.ScriptKind.TS);
 		const printer = ts.createPrinter();
 
 		return [...context.values()]
-			.map((nodeAlias) => printer.printNode(ts.EmitHint.Unspecified, nodeAlias, sourceFile))
+			.flatMap(
+				(namedDeclaration) => [
+					printer.printNode(
+						ts.EmitHint.Unspecified,
+						namedDeclaration,
+						sourceFile,
+					),
+					exportType
+						? printer.printNode(
+							ts.EmitHint.Unspecified,
+							factory.createExportDeclaration(
+								undefined,
+								false,
+								factory.createNamedExports([
+									factory.createExportSpecifier(
+										false,
+										undefined,
+										namedDeclaration.name,
+									),
+								]),
+							),
+							sourceFile,
+						)
+						: undefined,
+				],
+			)
+			.filter(Boolean)
 			.join("\n\n")
 			.trim();
 	}
@@ -66,11 +111,33 @@ export abstract class ZodTypescriptTransformator {
 					);
 				}
 
+				if (zodSchema._identifier) {
+					context.set(
+						zodSchema,
+						factory.createTypeAliasDeclaration(
+							undefined,
+							factory.createIdentifier(zodSchema._identifier),
+							undefined,
+							typeNode,
+						),
+					);
+
+					return ZodTypescriptTransformator
+						.findTypescriptTransformator(
+							zodSchema,
+							context,
+						);
+				}
+
 				return typeNode;
 			}
 		}
 
-		throw new Error("ehh mais zebi");
+		return ZodTypescriptTransformator
+			.findTypescriptTransformator(
+				zod.unknown(),
+				context,
+			);
 	}
 
 	public static makeContext(zodSchema: ZodType, options: MakeContextOptions): MapContext {
@@ -140,7 +207,7 @@ export abstract class ZodTypescriptTransformator {
 			},
 		);
 
-		return this.contextToTypeInString(context);
+		return this.contextToTypeInString(context, !!options?.export);
 	}
 
 	public static getIdentifier() {
