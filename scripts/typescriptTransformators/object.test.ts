@@ -9,7 +9,7 @@ it("object", () => {
 		}),
 	);
 
-	const expected = "type Zod2ts_0_duplojs = { name: string; age: number;};";
+	const expected = "type Zod2ts_0_duplojs = { name: string; age: number;};".replace(/\s+/g, "");
 	const received = result.replace(/\s+/g, "");
-	expect(received).toBe(expected.replace(/\s+/g, ""));
+	expect(received).toBe(expected);
 });

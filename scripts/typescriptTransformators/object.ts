@@ -8,18 +8,6 @@ export class ZodObjectTypescriptTrasformator extends ZodTypescriptTransformator 
 		return ZodTypescriptTransformator.zod.ZodObject;
 	}
 
-	private static isUndefinedTypeNode(typeNode: TypeNode): boolean {
-		if (typeNode.kind === SyntaxKind.UndefinedKeyword) {
-			return true;
-		}
-
-		if (isUnionTypeNode(typeNode)) {
-			return typeNode.types.some((key) => key.kind === SyntaxKind.UndefinedKeyword);
-		}
-
-		return false;
-	}
-
 	public makeTypeNode(zodSchema: ZodObject<ZodRawShape>, context: MapContext): TypeNode {
 		const properties = Object.entries(zodSchema.shape);
 
@@ -37,5 +25,17 @@ export class ZodObjectTypescriptTrasformator extends ZodTypescriptTransformator 
 				);
 			}),
 		);
+	}
+
+	private static isUndefinedTypeNode(typeNode: TypeNode): boolean {
+		if (typeNode.kind === SyntaxKind.UndefinedKeyword) {
+			return true;
+		}
+
+		if (isUnionTypeNode(typeNode)) {
+			return typeNode.types.some((key) => key.kind === SyntaxKind.UndefinedKeyword);
+		}
+
+		return false;
 	}
 }
