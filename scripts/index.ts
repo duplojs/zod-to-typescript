@@ -27,6 +27,8 @@ import "./typescriptTransformators/effects";
 import "./typescriptTransformators/discriminatedUnion";
 import "./typescriptTransformators/default";
 import "./typescriptTransformators/literal";
+import "./typescriptTransformators/lazy";
+import "./typescriptTransformators/pipeline";
 
 export * from "./zodTypescriptTransformator";
 

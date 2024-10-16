@@ -173,7 +173,19 @@ export abstract class ZodTypescriptTransformator {
 	public static convert(zodSchema: ZodType, options: ConvertOptions = {}): string {
 		let baseContext = new Map(options.context);
 
+		const identifier = options.name ?? this.getIdentifier();
+
 		if (options.indentifiers) {
+			baseContext.set(
+				zodSchema,
+				factory.createTypeAliasDeclaration(
+					undefined,
+					factory.createIdentifier(identifier),
+					undefined,
+					factory.createLiteralTypeNode(factory.createNull()),
+				),
+			);
+
 			options.indentifiers.forEach((indentifier) => {
 				const currentZodSchema = indentifier instanceof ZodType
 					? indentifier
@@ -197,12 +209,14 @@ export abstract class ZodTypescriptTransformator {
 
 				baseContext = new Map([...baseContext, ...localContext]);
 			});
+
+			baseContext.delete(zodSchema);
 		}
 
 		const context = this.makeContext(
 			zodSchema,
 			{
-				name: options.name ?? this.getIdentifier(),
+				name: identifier,
 				context: baseContext,
 			},
 		);
