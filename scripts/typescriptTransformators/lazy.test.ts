@@ -8,7 +8,5 @@ it("lazy", () => {
 
 	const result = ZodTypescriptTransformator.convert(zodSchema);
 
-	const expected = "type Zod2ts_0_duplojs = { prop1: Zod2ts_0_duplojs[]; };".replace(/\s+/g, "");
-	const received = result.replace(/\s+/g, "");
-	expect(received).toBe(expected);
+	expect(result).toMatchSnapshot();
 });

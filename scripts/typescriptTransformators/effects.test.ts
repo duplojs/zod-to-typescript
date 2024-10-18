@@ -2,7 +2,7 @@ import { ZodTypescriptTransformator } from "@scripts/index";
 import { z as zod } from "zod";
 
 it("effects", () => {
-	const result = ZodTypescriptTransformator.convert(zod.string().email());
+	const result = ZodTypescriptTransformator.convert(zod.string().transform((val) => val));
 
-	expect(result).toBe("type Zod2ts_0_duplojs = string;");
+	expect(result).toMatchSnapshot();
 });

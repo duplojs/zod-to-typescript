@@ -7,5 +7,5 @@ it("function", () => {
 			.returns(zod.number()),
 	);
 
-	expect(result).toBe("type Zod2ts_0_duplojs = (args_0: string, ...rest: unknown[]) => number;");
+	expect(result).toMatchSnapshot();
 });

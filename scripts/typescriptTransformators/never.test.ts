@@ -4,5 +4,5 @@ import { z as zod } from "zod";
 it("never", () => {
 	const result = ZodTypescriptTransformator.convert(zod.never());
 
-	expect(result).toBe("type Zod2ts_0_duplojs = never;");
+	expect(result).toMatchSnapshot();
 });

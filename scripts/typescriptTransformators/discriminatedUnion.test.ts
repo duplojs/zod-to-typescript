@@ -14,7 +14,5 @@ it("discrimnatedUnion", () => {
 			}),
 		]),
 	);
-	const expected = "type Zod2ts_0_duplojs = { kind: \"a\"; stringProp: string; } | { kind: \"b\"; numberProp: number; };";
-	const received = result.replace(/\s+/g, "");
-	expect(received).toBe(expected.replace(/\s+/g, ""));
+	expect(result).toMatchSnapshot();
 });

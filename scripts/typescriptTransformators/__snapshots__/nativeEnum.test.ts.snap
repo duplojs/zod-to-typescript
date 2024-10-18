@@ -1,0 +1,11 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`nativeEnum 1`] = `
+"enum Zod2ts_1_duplojs {
+    A = "a",
+    B = "b",
+    C = "c"
+}
+
+type Zod2ts_0_duplojs = Zod2ts_0_duplojs;"
+`;

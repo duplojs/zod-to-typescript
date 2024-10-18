@@ -6,5 +6,5 @@ it("intersection", () => {
 		zod.string().and(zod.number()),
 	);
 
-	expect(result).toBe("type Zod2ts_0_duplojs = string & number;");
+	expect(result).toMatchSnapshot();
 });

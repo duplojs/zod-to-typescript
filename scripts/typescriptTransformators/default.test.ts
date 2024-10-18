@@ -7,5 +7,5 @@ it("default", () => {
 			.default("duplojs"),
 	);
 
-	expect(result).toBe("type Zod2ts_0_duplojs = string | undefined;");
+	expect(result).toMatchSnapshot();
 });

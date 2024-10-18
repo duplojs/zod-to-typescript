@@ -4,5 +4,5 @@ import { z as zod } from "zod";
 it("Date", () => {
 	const result = ZodTypescriptTransformator.convert(zod.date());
 
-	expect(result).toBe("type Zod2ts_0_duplojs = Date;");
+	expect(result).toMatchSnapshot();
 });

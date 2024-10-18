@@ -1,0 +1,7 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`record > <enum, string> 1`] = `"type Zod2ts_2_duplojs = Record<"toto" | "tata", string>;"`;
+
+exports[`record > <number, string> 1`] = `"type Zod2ts_0_duplojs = Record<number, string>;"`;
+
+exports[`record > <string, string> 1`] = `"type Zod2ts_1_duplojs = Record<string, string>;"`;

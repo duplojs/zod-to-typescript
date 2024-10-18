@@ -1,59 +1,89 @@
-import { ZodTypescriptTransformator } from "@scripts/index";
+import { ZodTypescriptTransformator, type MapContext } from "@scripts/index";
+import type { TypeNode } from "typescript";
 import { z as zod } from "zod";
 
-const expected
-= `type Comment = {
-    user: User;
-    content: string;
-};
+describe("identifier", () => {
+	it("with identifier", () => {
+		const commentSchema = zod.object({
+			user: zod.lazy<any>(() => userSchema),
+			content: zod.string(),
+		}).identifier("Comment");
 
-type Post = {
-    title: string;
-    content: string;
-    date: Date;
-    comments: Comment[];
-};
+		const postSchema = zod.object({
+			title: zod.string(),
+			content: zod.string(),
+			date: zod.coerce.date(),
+			comments: commentSchema.array(),
+		});
 
-type User = {
-    userId: number;
-    firstname: string;
-    lastname: string;
-    posts: Post[];
-};`;
+		const userSchema = zod.object({
+			userId: zod.number(),
+			firstname: zod.string(),
+			lastname: zod.string(),
+			posts: postSchema.array(),
+		});
 
-it("identifier", () => {
-	const commentSchema = zod.object({
-		user: zod.lazy<any>(() => userSchema),
-		content: zod.string(),
-	}).identifier("Comment");
+		const result = ZodTypescriptTransformator
+			.convert(
+				userSchema,
+				{
+					name: "User",
+					indentifiers: [
+						{
+							name: "Post",
+							zodSchema: postSchema,
+						},
+					],
+					export: false,
+				},
+			);
 
-	const postSchema = zod.object({
-		title: zod.string(),
-		content: zod.string(),
-		date: zod.coerce.date(),
-		comments: commentSchema.array(),
+		expect(result).toMatchSnapshot();
 	});
 
-	const userSchema = zod.object({
-		userId: zod.number(),
-		firstname: zod.string(),
-		lastname: zod.string(),
-		posts: postSchema.array(),
+	it("inject zod", () => {
+		class TestTransformator extends ZodTypescriptTransformator {
+			public get support(): new (...args: any[]) => zod.ZodType {
+				throw new Error("...");
+			}
+
+			public makeTypeNode(zodSchema: zod.ZodType, context: MapContext): TypeNode {
+				throw new Error("...");
+			}
+
+			public static getZodInstace() {
+				return this.zod;
+			}
+		}
+
+		TestTransformator.injectZod(zod);
+
+		expect(TestTransformator.getZodInstace()).toMatchSnapshot();
 	});
 
-	const result = ZodTypescriptTransformator
-		.convert(
-			userSchema,
+	it("with identifier as zod schema", () => {
+		const schema = zod.string();
+
+		const result = ZodTypescriptTransformator.convert(
+			schema,
 			{
-				name: "User",
-				indentifiers: [
-					{
-						name: "Post",
-						zodSchema: postSchema,
-					},
-				],
+				indentifiers: [schema],
 			},
 		);
 
-	expect(result).toBe(expected);
+		expect(result).toMatchSnapshot();
+	});
+
+	it("export type", () => {
+		const result = ZodTypescriptTransformator.convert(zod.string(), { export: true });
+
+		expect(result).toMatchSnapshot();
+	});
+
+	it("something that is not a schema", () => {
+		const func = (val: string) => val;
+		const result = ZodTypescriptTransformator.convert(func as never);
+
+		expect(result).toMatchSnapshot();
+	});
 });

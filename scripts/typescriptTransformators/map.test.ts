@@ -6,5 +6,5 @@ it("map", () => {
 		zod.map(zod.string(), zod.string()),
 	);
 
-	expect(result).toBe("type Zod2ts_0_duplojs = Map<string, string>;");
+	expect(result).toMatchSnapshot();
 });
