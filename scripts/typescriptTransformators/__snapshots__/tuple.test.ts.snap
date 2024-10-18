@@ -1,0 +1,16 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`tuple > no rest 1`] = `
+"type Zod2ts_0_duplojs = [
+    string,
+    number
+];"
+`;
+
+exports[`tuple > with rest 1`] = `
+"type Zod2ts_1_duplojs = [
+    string,
+    number,
+    ...null[]
+];"
+`;

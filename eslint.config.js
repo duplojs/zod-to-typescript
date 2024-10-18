@@ -12,6 +12,7 @@ export default [
 			"func-style": "off",
 			"@typescript-eslint/no-unsafe-member-access": "off",
 			"@typescript-eslint/no-unsafe-argument": "off",
+			"@typescript-eslint/no-use-before-define": "off",
 			"no-useless-assignment": "off",
 		},
 		files: ["**/*.test.ts", "test/**/*.ts"],
