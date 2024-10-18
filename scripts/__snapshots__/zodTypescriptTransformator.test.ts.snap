@@ -1,0 +1,45 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`zodTypescriptTransformator > comment props object 1`] = `
+"type Zod2ts_5_duplojs = {
+    prop1: string;
+    /** @deprected */
+    prop2: number;
+};"
+`;
+
+exports[`zodTypescriptTransformator > comment type 1`] = `
+"/** @deprected */
+type Zod2ts_4_duplojs = number;"
+`;
+
+exports[`zodTypescriptTransformator > export type 1`] = `
+"type Zod2ts_2_duplojs = string;
+
+export { Zod2ts_2_duplojs };"
+`;
+
+exports[`zodTypescriptTransformator > something that is not a schema 1`] = `"type Zod2ts_3_duplojs = unknown;"`;
+
+exports[`zodTypescriptTransformator > with identifier 1`] = `
+"type Comment = {
+    user: User;
+    content: string;
+};
+
+type Post = {
+    title: string;
+    content: string;
+    date: Date;
+    comments: Comment[];
+};
+
+type User = {
+    userId: number;
+    firstname: string;
+    lastname: string;
+    posts: Post[];
+};"
+`;
+
+exports[`zodTypescriptTransformator > with identifier as zod schema 1`] = `"type Zod2ts_0_duplojs = string;"`;

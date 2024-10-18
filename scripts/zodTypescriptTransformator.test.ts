@@ -2,7 +2,7 @@ import { ZodTypescriptTransformator, type MapContext } from "@scripts/index";
 import type { TypeNode } from "typescript";
 import { z as zod } from "zod";
 
-describe("identifier", () => {
+describe("zodTypescriptTransformator", () => {
 	it("with identifier", () => {
 		const commentSchema = zod.object({
 			user: zod.lazy<any>(() => userSchema),
@@ -58,7 +58,7 @@ describe("identifier", () => {
 
 		TestTransformator.injectZod(zod);
 
-		expect(TestTransformator.getZodInstace()).toMatchSnapshot();
+		expect(TestTransformator.getZodInstace()).toBe(zod);
 	});
 
 	it("with identifier as zod schema", () => {
@@ -84,6 +84,23 @@ describe("identifier", () => {
 		const func = (val: string) => val;
 		const result = ZodTypescriptTransformator.convert(func as never);
 
+		expect(result).toMatchSnapshot();
+	});
+
+	it("comment type", () => {
+		const zodSchema = zod.number().describe("@deprected");
+
+		const result = ZodTypescriptTransformator.convert(zodSchema);
+		expect(result).toMatchSnapshot();
+	});
+
+	it("comment props object", () => {
+		const zodSchema = zod.object({
+			prop1: zod.string(),
+			prop2: zod.number().describe("@deprected"),
+		});
+
+		const result = ZodTypescriptTransformator.convert(zodSchema);
 		expect(result).toMatchSnapshot();
 	});
 });

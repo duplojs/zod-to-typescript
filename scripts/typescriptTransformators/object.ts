@@ -1,3 +1,4 @@
+import { addComment } from "@scripts/utils/addComment";
 import { type MapContext, ZodTypescriptTransformator } from "@scripts/zodTypescriptTransformator";
 import { type TypeNode, factory, SyntaxKind, isUnionTypeNode } from "typescript";
 import type { ZodObject, ZodRawShape, ZodType } from "zod";
@@ -12,17 +13,22 @@ export class ZodObjectTypescriptTrasformator extends ZodTypescriptTransformator 
 		const properties = Object.entries(zodSchema.shape);
 
 		return factory.createTypeLiteralNode(
-			properties.map(([name, schema]: [string, ZodType]) => {
-				const keyType = ZodTypescriptTransformator.findTypescriptTransformator(schema, context);
+			properties.map(([name, subZodSchema]: [string, ZodType]) => {
+				const subTypeNode = ZodTypescriptTransformator.findTypescriptTransformator(subZodSchema, context);
 
-				return factory.createPropertySignature(
+				const propertyTypeNode = factory.createPropertySignature(
 					undefined,
 					name,
-					ZodObjectTypescriptTrasformator.isUndefinedTypeNode(keyType)
+					ZodObjectTypescriptTrasformator.isUndefinedTypeNode(subTypeNode)
 						? factory.createToken(SyntaxKind.QuestionToken)
 						: undefined,
-					keyType,
+					subTypeNode,
 				);
+
+				if (subZodSchema.description) {
+					addComment(propertyTypeNode, subZodSchema.description);
+				}
+				return propertyTypeNode;
 			}),
 		);
 	}
@@ -33,7 +39,7 @@ export class ZodObjectTypescriptTrasformator extends ZodTypescriptTransformator 
 		}
 
 		if (isUnionTypeNode(typeNode)) {
-			return typeNode.types.some((key) => key.kind === SyntaxKind.UndefinedKeyword);
+			return typeNode.types.some((subTypeNode) => this.isUndefinedTypeNode(subTypeNode));
 		}
 
 		return false;

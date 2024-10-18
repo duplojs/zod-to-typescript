@@ -1,5 +1,7 @@
 import { ZodType, z as zod } from "zod";
-import ts, { type TypeNode, factory, SyntaxKind, type JSDocContainer, type Declaration, type Identifier } from "typescript";
+import ts, { type TypeNode, factory, type JSDocContainer, type Declaration, type Identifier } from "typescript";
+import { addComment } from "@utils/addComment";
+import { createTempAlias, createTextAlias } from "./utils/alias";
 
 export interface NamedDeclaration extends Declaration, JSDocContainer {
 	readonly name: Identifier;
@@ -102,24 +104,10 @@ export abstract class ZodTypescriptTransformator {
 			if (zodSchema instanceof typescriptTransformator.support) {
 				const typeNode = typescriptTransformator.makeTypeNode(zodSchema, context);
 
-				if (zodSchema.description) {
-					ts.addSyntheticLeadingComment(
-						typeNode,
-						SyntaxKind.MultiLineCommentTrivia,
-						`* ${zodSchema.description}`,
-						true,
-					);
-				}
-
 				if (zodSchema._identifier) {
 					context.set(
 						zodSchema,
-						factory.createTypeAliasDeclaration(
-							undefined,
-							factory.createIdentifier(zodSchema._identifier),
-							undefined,
-							typeNode,
-						),
+						createTextAlias(typeNode, zodSchema._identifier),
 					);
 
 					return ZodTypescriptTransformator
@@ -145,26 +133,22 @@ export abstract class ZodTypescriptTransformator {
 
 		context.set(
 			zodSchema,
-			factory.createTypeAliasDeclaration(
-				undefined,
-				factory.createIdentifier(options.name),
-				undefined,
-				factory.createLiteralTypeNode(factory.createNull()),
-			),
+			createTempAlias(options.name),
 		);
 
-		const nodeType = this.findTypescriptTransformator(zodSchema, context, true);
+		const typeNode = this.findTypescriptTransformator(zodSchema, context, true);
+
+		const declaration = createTextAlias(typeNode, options.name);
+
+		if (zodSchema.description) {
+			addComment(declaration, zodSchema.description);
+		}
 
 		context.delete(zodSchema);
 
 		context.set(
 			zodSchema,
-			factory.createTypeAliasDeclaration(
-				undefined,
-				factory.createIdentifier(options.name),
-				undefined,
-				nodeType,
-			),
+			declaration,
 		);
 
 		return context;
@@ -178,12 +162,7 @@ export abstract class ZodTypescriptTransformator {
 		if (options.indentifiers) {
 			baseContext.set(
 				zodSchema,
-				factory.createTypeAliasDeclaration(
-					undefined,
-					factory.createIdentifier(identifier),
-					undefined,
-					factory.createLiteralTypeNode(factory.createNull()),
-				),
+				createTempAlias(identifier),
 			);
 
 			options.indentifiers.forEach((indentifier) => {
