@@ -1,9 +1,9 @@
-import { ZodTypescriptTransformator } from "@scripts/index";
+import { ZodToTypescript } from "@scripts/index";
 import { z as zod } from "zod";
 
 describe("record", () => {
 	it("<number, string>", () => {
-		const result = ZodTypescriptTransformator.convert(
+		const result = ZodToTypescript.convert(
 			zod.record(zod.number(), zod.string()),
 		);
 
@@ -11,7 +11,7 @@ describe("record", () => {
 	});
 
 	it("<string, string>", () => {
-		const result = ZodTypescriptTransformator.convert(
+		const result = ZodToTypescript.convert(
 			zod.record(zod.string()),
 		);
 
@@ -19,7 +19,7 @@ describe("record", () => {
 	});
 
 	it("<enum, string>", () => {
-		const result = ZodTypescriptTransformator.convert(
+		const result = ZodToTypescript.convert(
 			zod.record(zod.enum(["toto", "tata"]), zod.string()),
 		);
 

@@ -1,4 +1,4 @@
-import { ZodTypescriptTransformator } from "@scripts/index";
+import { ZodToTypescript } from "@scripts/index";
 import { z as zod, type ZodType } from "zod";
 
 it("lazy", () => {
@@ -6,7 +6,7 @@ it("lazy", () => {
 		prop1: zod.lazy(() => zodSchema.array()),
 	});
 
-	const result = ZodTypescriptTransformator.convert(zodSchema);
+	const result = ZodToTypescript.convert(zodSchema);
 
 	expect(result).toMatchSnapshot();
 });

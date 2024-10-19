@@ -29,6 +29,8 @@ import "./typescriptTransformators/default";
 import "./typescriptTransformators/literal";
 import "./typescriptTransformators/lazy";
 import "./typescriptTransformators/pipeline";
+import "./typescriptTransformators/brand";
+import "./typescriptTransformators/symbol";
 
-export * from "./zodTypescriptTransformator";
+export * from "./ZodToTypescript";
 

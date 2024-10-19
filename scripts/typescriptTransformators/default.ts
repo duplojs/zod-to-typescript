@@ -1,14 +1,14 @@
-import { type MapContext, ZodTypescriptTransformator } from "@scripts/zodTypescriptTransformator";
+import { type MapContext, TypescriptTransformator, ZodToTypescript } from "@scripts/ZodToTypescript";
 import { type TypeNode } from "typescript";
 import type { ZodDefault, ZodType } from "zod";
 
-@ZodTypescriptTransformator.autoInstance
-export class ZodDefaultTypescriptTrasformator extends ZodTypescriptTransformator {
+@ZodToTypescript.autoInstance
+export class ZodDefaultTypescriptTrasformator implements TypescriptTransformator {
 	public get support() {
-		return ZodTypescriptTransformator.zod.ZodDefault;
+		return ZodToTypescript.zod.ZodDefault;
 	}
 
 	public makeTypeNode(zodSchema: ZodDefault<ZodType>, context: MapContext): TypeNode {
-		return ZodTypescriptTransformator.findTypescriptTransformator(zodSchema._def.innerType, context);
+		return ZodToTypescript.findTypescriptTransformator(zodSchema._def.innerType, context);
 	}
 }

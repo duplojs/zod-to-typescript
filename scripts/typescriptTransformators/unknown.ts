@@ -1,10 +1,10 @@
-import { ZodTypescriptTransformator } from "@scripts/zodTypescriptTransformator";
+import { TypescriptTransformator, ZodToTypescript } from "@scripts/ZodToTypescript";
 import { type TypeNode, factory, SyntaxKind } from "typescript";
 
-@ZodTypescriptTransformator.autoInstance
-export class ZodUnknownTypescriptTrasformator extends ZodTypescriptTransformator {
+@ZodToTypescript.autoInstance
+export class ZodUnknownTypescriptTrasformator implements TypescriptTransformator {
 	public get support() {
-		return ZodTypescriptTransformator.zod.ZodUnknown;
+		return ZodToTypescript.zod.ZodUnknown;
 	}
 
 	public makeTypeNode(): TypeNode {

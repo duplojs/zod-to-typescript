@@ -19,6 +19,27 @@ exports[`zodTypescriptTransformator > export type 1`] = `
 export { Zod2ts_2_duplojs };"
 `;
 
+exports[`zodTypescriptTransformator > new ZodToTypescript 1`] = `
+"type Comment = {
+    user: User;
+    content: string;
+};
+
+type User = {
+    userId: number;
+    firstname: string;
+    lastname: string;
+    posts: Post[];
+};
+
+type Post = {
+    title: string;
+    content: string;
+    date: Date;
+    comments: Comment[];
+};"
+`;
+
 exports[`zodTypescriptTransformator > something that is not a schema 1`] = `"type Zod2ts_3_duplojs = unknown;"`;
 
 exports[`zodTypescriptTransformator > with identifier 1`] = `

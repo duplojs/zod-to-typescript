@@ -1,8 +1,8 @@
-import { ZodTypescriptTransformator } from "@scripts/index";
+import { ZodToTypescript } from "@scripts/index";
 import { z as zod } from "zod";
 
 it("discrimnatedUnion", () => {
-	const result = ZodTypescriptTransformator.convert(
+	const result = ZodToTypescript.convert(
 		zod.discriminatedUnion("kind", [
 			zod.object({
 				kind: zod.literal("a"),

@@ -36,7 +36,7 @@ npm install @duplojs/zod-to-typescript typescript
 
 ```ts
 import { z as zod } from 'zod';
-import { ZodTypescriptTransformator } from '@duplojs/zod-to-typescript';
+import { ZodToTypescript } from '@duplojs/zod-to-typescript';
 ```
 
 ### 2. Define Zod schema
@@ -52,14 +52,14 @@ const schema = zod.object({
 
 ### 3. Convert Zod schema to TypeScript type
 
-Use the `convert` method of `ZodTypescriptTransformator` to convert the Zod schema to a TypeScript type declaration:
+Use the `convert` method of `ZodToTypescript` to convert the Zod schema to a TypeScript type declaration:
 ```ts
 const options: ConvertOptions = {
     name: "User", // Optional: Specify a name for the TypeScript type
     export: true, // Optional: Export the TypeScript type
 };
 
-const tsType = ZodTypescriptTransformator.convert(userSchema, options);
+const tsType = ZodToTypescript.convert(userSchema, options);
 console.log(tsType);
 ```
 
@@ -79,7 +79,7 @@ export type User = {
 
 ```ts
 import { z as zod } from 'zod';
-import { ZodTypescriptTransformator } from '@duplojs/zod-to-typescript';
+import { ZodToTypescript } from '@duplojs/zod-to-typescript';
 
 const schema = zod.object({
   name: zod.string(),
@@ -92,16 +92,16 @@ const options: ConvertOptions = {
 	export: true,
 };
 
-const tsType = ZodTypescriptTransformator.convert(schema, options);
+const tsType = ZodToTypescript.convert(schema, options);
 console.log(tsType);
 // Output: export type User = { name: string; age: number; isStudent: boolean; };
 ```
 
-`ZodTypescriptTransformator` is a powerful utility for converting Zod schemas to TypeScript type declarations. By following this guide, you can easily integrate it into your TypeScript projects and extend it to support custom Zod types.
+`ZodToTypescript` is a powerful utility for converting Zod schemas to TypeScript type declarations. By following this guide, you can easily integrate it into your TypeScript projects and extend it to support custom Zod types.
 
 ### More Examples
 
-For more examples, please check the unit tests for each type in the `tests` directory. The tests provide comprehensive examples of how to use each supported type with `ZodTypescriptTransformator`.
+For more examples, please check the unit tests for each type in the `tests` directory. The tests provide comprehensive examples of how to use each supported type with `ZodToTypescript`.
 
 ## Supported Types
 

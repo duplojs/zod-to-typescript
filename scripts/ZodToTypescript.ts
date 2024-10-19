@@ -16,7 +16,7 @@ export interface ConvertIdentifier {
 
 export interface MakeContextOptions {
 	name: string;
-	context: MapContext;
+	context?: MapContext;
 }
 
 export interface ConvertOptions {
@@ -24,6 +24,10 @@ export interface ConvertOptions {
 	context?: MapContext;
 	indentifiers?: (ConvertIdentifier | ZodType)[];
 	export?: boolean;
+}
+
+export interface FindTypescriptTransformatorOptions {
+	skipDeclarationStatement?: boolean;
 }
 
 declare module "zod" {
@@ -40,18 +44,52 @@ ZodType.prototype.identifier = function(name) {
 	return this;
 };
 
-export abstract class ZodTypescriptTransformator {
-	public abstract get support(): new (...args: any[]) => ZodType;
+export interface TypescriptTransformator {
+	get support(): new (...args: any[]) => ZodType;
 
-	public abstract makeTypeNode(zodSchema: ZodType, context: MapContext): TypeNode;
+	makeTypeNode(zodSchema: ZodType, context: MapContext): TypeNode;
+}
 
-	public static typescriptTransformators: ZodTypescriptTransformator[] = [];
+export class ZodToTypescript {
+	public aliasContext: MapContext = new Map();
 
-	protected static zod = zod;
+	public static typescriptTransformators: TypescriptTransformator[] = [];
+
+	public static zod = zod;
 
 	private static count = 0;
 
-	public static contextToTypeInString(context: MapContext, exportType = false): string {
+	public append(zodSchema: ZodType, name?: string) {
+		const aliasName = zodSchema._identifier ?? name ?? ZodToTypescript.getIdentifier();
+
+		this.aliasContext.set(
+			zodSchema,
+			createTempAlias(aliasName),
+		);
+	}
+
+	public toString(exportType = false) {
+		const context = new Map(this.aliasContext);
+
+		[...this.aliasContext.entries()].forEach(
+			([zodSchema, alias]) => {
+				ZodToTypescript.makeContextFromZodSchema(
+					zodSchema,
+					{
+						name: alias.name.text,
+						context,
+					},
+				);
+			},
+		);
+
+		return ZodToTypescript.stringifyContext(
+			context,
+			exportType,
+		);
+	}
+
+	public static stringifyContext(context: MapContext, exportType = false): string {
 		const sourceFile = ts.createSourceFile("print.ts", "", ts.ScriptTarget.Latest, false, ts.ScriptKind.TS);
 		const printer = ts.createPrinter();
 
@@ -90,8 +128,9 @@ export abstract class ZodTypescriptTransformator {
 	public static findTypescriptTransformator(
 		zodSchema: ZodType,
 		context: MapContext,
-		skipDeclarationStatement = false,
+		options: FindTypescriptTransformatorOptions = {},
 	): TypeNode {
+		const { skipDeclarationStatement } = options;
 		const declarationStatement = context.get(zodSchema);
 
 		if (!skipDeclarationStatement && declarationStatement) {
@@ -110,7 +149,7 @@ export abstract class ZodTypescriptTransformator {
 						createTextAlias(typeNode, zodSchema._identifier),
 					);
 
-					return ZodTypescriptTransformator
+					return ZodToTypescript
 						.findTypescriptTransformator(
 							zodSchema,
 							context,
@@ -121,24 +160,30 @@ export abstract class ZodTypescriptTransformator {
 			}
 		}
 
-		return ZodTypescriptTransformator
+		return ZodToTypescript
 			.findTypescriptTransformator(
 				zod.unknown(),
 				context,
 			);
 	}
 
-	public static makeContext(zodSchema: ZodType, options: MakeContextOptions): MapContext {
-		const context = new Map(options.context);
+	public static makeContextFromZodSchema(zodSchema: ZodType, options: MakeContextOptions): MapContext {
+		const context: MapContext = options.context ?? new Map();
 
 		context.set(
 			zodSchema,
 			createTempAlias(options.name),
 		);
 
-		const typeNode = this.findTypescriptTransformator(zodSchema, context, true);
+		const typeNode = this.findTypescriptTransformator(
+			zodSchema,
+			context,
+			{ skipDeclarationStatement: true },
+		);
 
-		const declaration = createTextAlias(typeNode, options.name);
+		const declaration
+			= (zodSchema._identifier && context.get(zodSchema))
+			|| createTextAlias(typeNode, options.name);
 
 		if (zodSchema.description) {
 			addComment(declaration, zodSchema.description);
@@ -155,7 +200,7 @@ export abstract class ZodTypescriptTransformator {
 	}
 
 	public static convert(zodSchema: ZodType, options: ConvertOptions = {}): string {
-		let baseContext = new Map(options.context);
+		const baseContext = new Map(options.context);
 
 		const identifier = options.name ?? this.getIdentifier();
 
@@ -178,21 +223,19 @@ export abstract class ZodTypescriptTransformator {
 					return;
 				}
 
-				const localContext = this.makeContext(
+				this.makeContextFromZodSchema(
 					currentZodSchema,
 					{
 						name: currentName,
 						context: baseContext,
 					},
 				);
-
-				baseContext = new Map([...baseContext, ...localContext]);
 			});
 
 			baseContext.delete(zodSchema);
 		}
 
-		const context = this.makeContext(
+		this.makeContextFromZodSchema(
 			zodSchema,
 			{
 				name: identifier,
@@ -200,7 +243,7 @@ export abstract class ZodTypescriptTransformator {
 			},
 		);
 
-		return this.contextToTypeInString(context, !!options?.export);
+		return this.stringifyContext(baseContext, !!options?.export);
 	}
 
 	public static getIdentifier() {
@@ -213,8 +256,8 @@ export abstract class ZodTypescriptTransformator {
 		this.zod = zod;
 	}
 
-	public static autoInstance(ZodTypeTypescriptTransformator: new() => ZodTypescriptTransformator) {
-		ZodTypescriptTransformator
+	public static autoInstance(ZodTypeTypescriptTransformator: new() => TypescriptTransformator) {
+		ZodToTypescript
 			.typescriptTransformators
 			.push(new ZodTypeTypescriptTransformator());
 	}

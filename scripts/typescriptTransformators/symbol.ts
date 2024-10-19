@@ -2,12 +2,12 @@ import { TypescriptTransformator, ZodToTypescript } from "@scripts/ZodToTypescri
 import { type TypeNode, factory, SyntaxKind } from "typescript";
 
 @ZodToTypescript.autoInstance
-export class ZodBooleanTypescriptTrasformator implements TypescriptTransformator {
+export class ZodSymbolTypescriptTransformator implements TypescriptTransformator {
 	public get support() {
-		return ZodToTypescript.zod.ZodBoolean;
+		return ZodToTypescript.zod.ZodSymbol;
 	}
 
 	public makeTypeNode(): TypeNode {
-		return factory.createKeywordTypeNode(SyntaxKind.BooleanKeyword);
+		return factory.createKeywordTypeNode(SyntaxKind.SymbolKeyword);
 	}
 }

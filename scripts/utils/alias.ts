@@ -1,17 +1,17 @@
-import { factory, type TypeNode } from "typescript";
+import { factory, SyntaxKind, type TypeNode } from "typescript";
 
-export function createTextAlias(typeNode: TypeNode, alias: string) {
+export function createTextAlias(typeNode: TypeNode, text: string, exported?: boolean) {
 	return factory.createTypeAliasDeclaration(
-		undefined,
-		factory.createIdentifier(alias),
+		exported ? [factory.createModifier(SyntaxKind.ExportKeyword)] : undefined,
+		factory.createIdentifier(text),
 		undefined,
 		typeNode,
 	);
 }
 
-export function createTempAlias(alias: string) {
+export function createTempAlias(text: string) {
 	return createTextAlias(
 		factory.createLiteralTypeNode(factory.createNull()),
-		alias,
+		text,
 	);
 }

@@ -1,23 +1,23 @@
-import { type MapContext, ZodTypescriptTransformator } from "@scripts/zodTypescriptTransformator";
+import { type MapContext, TypescriptTransformator, ZodToTypescript } from "@scripts/ZodToTypescript";
 import { type TypeNode, factory } from "typescript";
 import type { ZodTuple, ZodType } from "zod";
 
-@ZodTypescriptTransformator.autoInstance
-export class ZodTupleTypescriptTrasformator extends ZodTypescriptTransformator {
+@ZodToTypescript.autoInstance
+export class ZodTupleTypescriptTrasformator implements TypescriptTransformator {
 	public get support() {
-		return ZodTypescriptTransformator.zod.ZodTuple;
+		return ZodToTypescript.zod.ZodTuple;
 	}
 
 	public makeTypeNode(zodSchema: ZodTuple<[ZodType]>, context: MapContext): TypeNode {
 		const items = zodSchema.items.map(
-			(schema) => ZodTypescriptTransformator.findTypescriptTransformator(schema, context),
+			(schema) => ZodToTypescript.findTypescriptTransformator(schema, context),
 		);
 
 		const typeNodeRest = zodSchema._def.rest
 			? [
 				factory.createRestTypeNode(
 					factory.createArrayTypeNode(
-						ZodTypescriptTransformator.findTypescriptTransformator(zodSchema._def.rest, context),
+						ZodToTypescript.findTypescriptTransformator(zodSchema._def.rest, context),
 					),
 				),
 			]

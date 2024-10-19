@@ -1,12 +1,12 @@
 import { addComment } from "@scripts/utils/addComment";
-import { type MapContext, ZodTypescriptTransformator } from "@scripts/zodTypescriptTransformator";
+import { type MapContext, TypescriptTransformator, ZodToTypescript } from "@scripts/ZodToTypescript";
 import { type TypeNode, factory, SyntaxKind, isUnionTypeNode } from "typescript";
 import type { ZodObject, ZodRawShape, ZodType } from "zod";
 
-@ZodTypescriptTransformator.autoInstance
-export class ZodObjectTypescriptTrasformator extends ZodTypescriptTransformator {
+@ZodToTypescript.autoInstance
+export class ZodObjectTypescriptTrasformator implements TypescriptTransformator {
 	public get support() {
-		return ZodTypescriptTransformator.zod.ZodObject;
+		return ZodToTypescript.zod.ZodObject;
 	}
 
 	public makeTypeNode(zodSchema: ZodObject<ZodRawShape>, context: MapContext): TypeNode {
@@ -14,7 +14,7 @@ export class ZodObjectTypescriptTrasformator extends ZodTypescriptTransformator 
 
 		return factory.createTypeLiteralNode(
 			properties.map(([name, subZodSchema]: [string, ZodType]) => {
-				const subTypeNode = ZodTypescriptTransformator.findTypescriptTransformator(subZodSchema, context);
+				const subTypeNode = ZodToTypescript.findTypescriptTransformator(subZodSchema, context);
 
 				const propertyTypeNode = factory.createPropertySignature(
 					undefined,

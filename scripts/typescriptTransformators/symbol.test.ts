@@ -1,8 +1,8 @@
 import { ZodToTypescript } from "@scripts/index";
 import { z as zod } from "zod";
 
-it("enum", () => {
-	const result = ZodToTypescript.convert(zod.enum(["a", "b", "c"]));
+it("brand", () => {
+	const result = ZodToTypescript.convert(zod.symbol());
 
 	expect(result).toMatchSnapshot();
 });

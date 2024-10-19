@@ -1,16 +1,16 @@
-import { type MapContext, ZodTypescriptTransformator } from "@scripts/zodTypescriptTransformator";
+import { type MapContext, TypescriptTransformator, ZodToTypescript } from "@scripts/ZodToTypescript";
 import { type TypeNode, factory } from "typescript";
 import type { ZodNullable, ZodType } from "zod";
 
-@ZodTypescriptTransformator.autoInstance
-export class ZodNullableTypescriptTrasformator extends ZodTypescriptTransformator {
+@ZodToTypescript.autoInstance
+export class ZodNullableTypescriptTrasformator implements TypescriptTransformator {
 	public get support() {
-		return ZodTypescriptTransformator.zod.ZodNullable;
+		return ZodToTypescript.zod.ZodNullable;
 	}
 
 	public makeTypeNode(zodSchema: ZodNullable<ZodType>, context: MapContext): TypeNode {
 		return factory.createUnionTypeNode([
-			ZodTypescriptTransformator.findTypescriptTransformator(
+			ZodToTypescript.findTypescriptTransformator(
 				zodSchema._def.innerType,
 				context,
 			),

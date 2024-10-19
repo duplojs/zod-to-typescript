@@ -1,8 +1,8 @@
-import { ZodTypescriptTransformator } from "@scripts/index";
+import { ZodToTypescript } from "@scripts/index";
 import { z as zod } from "zod";
 
 it("Date", () => {
-	const result = ZodTypescriptTransformator.convert(zod.date());
+	const result = ZodToTypescript.convert(zod.date());
 
 	expect(result).toMatchSnapshot();
 });
