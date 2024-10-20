@@ -38,9 +38,6 @@
     "dist",
     "README.md"
   ],
-  "workspaces": [
-    "test/integration"
-  ],
   "peerDependencies": {
     "zod": ">=3.23.8 <4.0.0",
     "typescript": ">=5.5.4 <6.0.0"
@@ -61,5 +58,12 @@
     "vite-tsconfig-paths": "^5.0.1",
     "vitest": "2.0.5"
   },
-  "keywords": []
+  "keywords": [
+	"zod",
+	"typescript",
+	"zod-to-ts",
+	"zod-typescript",
+	"typescript-generator",
+	"type-generation"
+  ]
 }
