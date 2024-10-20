@@ -20,7 +20,7 @@ jobs:
           configuration_path: ".github/workflows/main@check-title.json"
 
       - name: get current version
-        uses: duplojs/action-semver@v0.3.0
+        uses: duplojs/action-semver@v1
         id: semver
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
