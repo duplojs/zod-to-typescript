@@ -27,7 +27,7 @@
 
 To consume `@duplojs/zod-to-typescript`, you need to install the npm package and typescript.
 ```bash
-npm install @duplojs/zod-to-typescript typescript
+npm install @duplojs/zod-to-typescript typescript zod
 ```
 
 ## Usage
@@ -97,54 +97,126 @@ console.log(tsType);
 // Output: export type User = { name: string; age: number; isStudent: boolean; };
 ```
 
+### 6. Using Identifiers
+
+Identifiers allow you to give a name to a schema. You can also use a schema directly as an identifier. This can be useful when you have nested schemas and want to refer to them by name.
+
+```ts
+import { ZodToTypescript, ConvertOptions } from "@duplojs/zod-to-typescript";
+import { z } from "zod";
+
+// Define your schemas
+const addressSchema = z.object({
+    street: z.string(),
+    city: z.string(),
+    zipCode: z.string(),
+});
+
+const companySchema = z.object({
+    name: z.string(),
+    address: addressSchema,
+}).identifier("Company"); // automatically identifies the schema as "Company"
+
+const employeeSchema = z.object({
+    employeeId: z.number(),
+    name: z.string(),
+    position: z.string(),
+    company: companySchema,
+})
+
+// Convert the Employee schema to TypeScript
+const options: ConvertOptions = {
+    name: "Employee",
+    indentifiers: [
+        {
+            name: "Address", // define manually
+            zodSchema: addressSchema,
+        },
+    ],
+    export: true,
+};
+
+const tsType = ZodToTypescript.convert(employeeSchema, options);
+console.log(tsType);
+// Output:
+// export type Address = {
+//     street: string;
+//     city: string;
+//     zipCode: string;
+// };
+//
+// export type Company = {
+//     name: string;
+//     address: Address;
+// };
+//
+// export type Employee = {
+//     employeeId: number;
+//     name: string;
+//     position: string;
+//     company: Company;
+// };
+```
+
+### 7. Recursive Schemas
+
+Recursive schemas allow you to define schemas that reference themselves. This is useful for defining structures like trees or linked lists. You can use `z.lazy()` to create recursive schemas.
+
+```ts
+import { ZodToTypescript, ConvertOptions } from "@duplojs/zod-to-typescript";
+import { z } from "zod";
+
+const categorySchema = z.object({
+    name: z.string(),
+    subcategories: z.lazy(() => categorySchema.array()),
+}).identifier("Category");
+
+const tsType = ZodToTypescript.convert(categorySchema, { export: true });
+console.log(tsType);
+// Output:
+// export type Category = {
+//     name: string;
+//     subcategories: Category[];
+// };
+```
+
+### 8. Create context
+
+You can create a context to store the identifiers and options for the conversion. This can be useful when you have multiple schemas that reference each other.
+
+```ts
+import { ZodToTypescript } from "@duplojs/zod-to-typescript";
+import { z } from "zod";
+
+const userSchema = z.object({
+	userId: z.number(),
+	name: z.string(),
+});
+
+const context = ZodToTypescript.makeContext(
+	userSchema,
+	{
+		name: "User",
+	},
+);
+
+const tsType = ZodToTypescript.contextToTypeInString(context, true);
+console.log(tsType);
+// Output:
+// export type User = {
+//   userId: number;
+//   name: string;
+// };
+```
+
+This method allows you to modify or enrich the context before converting it to a TypeScript type declaration.
+
 `ZodToTypescript` is a powerful utility for converting Zod schemas to TypeScript type declarations. By following this guide, you can easily integrate it into your TypeScript projects and extend it to support custom Zod types.
 
 ### More Examples
 
 For more examples, please check the unit tests for each type in the `tests` directory. The tests provide comprehensive examples of how to use each supported type with `ZodToTypescript`.
 
-## Supported Types
-
-| Zod Type          | Supported | Test Link                                  |
-|-------------------|-----------|--------------------------------------------|
-| `z.string()`      | ✅         | [Test](./scripts/typescriptTransformators/string.test.ts) |
-| `z.number()`      | ✅         | [Test](./scripts/typescriptTransformators/number.test.ts) |
-| `z.boolean()`     | ✅         | [Test](./scripts/typescriptTransformators/boolean.test.ts) |
-| `z.bigint()`      | ✅         | [Test](./scripts/typescriptTransformators/bigint.test.ts) |
-| `z.symbol()`      | ❌         | |
-| `z.null()`        | ✅         | [Test](./scripts/typescriptTransformators/null.test.ts) |
-| `z.undefined()`   | ✅         | [Test](./scripts/typescriptTransformators/undefined.test.ts) |
-| `z.literal()`     | ✅         | [Test](./scripts/typescriptTransformators/literal.test.ts) |
-| `z.array()`       | ✅         | [Test](./scripts/typescriptTransformators/array.test.ts) |
-| `z.object()`      | ✅         | [Test](./scripts/typescriptTransformators/object.test.ts) |
-| `z.union()`       | ✅         | [Test](./scripts/typescriptTransformators/union.test.ts) |
-| `z.intersection()`| ✅         | [Test](./scripts/typescriptTransformators/intersection.test.ts) |
-| `z.tuple()`       | ✅         | [Test](./scripts/typescriptTransformators/tuple.test.ts) |
-| `z.record()`      | ✅         | [Test](./scripts/typescriptTransformators/record.test.ts) |
-| `z.map()`         | ✅         | [Test](./scripts/typescriptTransformators/map.test.ts) |
-| `z.set()`         | ✅         | [Test](./scripts/typescriptTransformators/set.test.ts) |
-| `z.date()`        | ✅         | [Test](./scripts/typescriptTransformators/date.test.ts) |
-| `z.function()`    | ✅         | [Test](./scripts/typescriptTransformators/function.test.ts) |
-| `.instanceof()`  | ❌         | |
-| `z.optional()`    | ✅         | [Test](./scripts/typescriptTransformators/optional.test.ts) |
-| `z.nullable()`    | ✅         | [Test](./scripts/typescriptTransformators/nullable.test.ts) |
-| `z.any()`         | ✅         | [Test](./scripts/typescriptTransformators/any.test.ts) |
-| `z.unknown()`     | ✅         | [Test](./scripts/typescriptTransformators/unknown.test.ts) |
-| `z.never()`       | ✅         | [Test](./scripts/typescriptTransformators/never.test.ts) |
-| `z.void()`        | ✅         | [Test](./scripts/typescriptTransformators/void.test.ts) |
-| `z.enum()`        | ✅         | [Test](./scripts/typescriptTransformators/enum.test.ts) |
-| `z.nativeEnum()`  | ✅         | [Test](./scripts/typescriptTransformators/nativeEnum.test.ts) |
-| `z.lazy()`        | ✅         | [Test](./scripts/typescriptTransformators/lazy.test.ts) |
-| `z.promise()`     | ✅         | [Test](./scripts/typescriptTransformators/promise.test.ts) |
-| `z.preprocess()`  | ❌         | |
-| `z.transform()`   | ✅         | |
-| `z.effect()`      | ✅         | [Test](./scripts/typescriptTransformators/effect.test.ts) |
-| `.brand<"TypeName">()` | ❌    | |
-| `.refine()`       | ✅         | |
-| `.describe()`     | ✅         | |
-
-
 ## Acknowledgements
 
 I would like to thank [sachinraja](https://github.com/sachinraja) for creating the [zod-to-ts zod](https://github.com/sachinraja/zod-to-ts) package, which served as an inspiration for this project.
-
