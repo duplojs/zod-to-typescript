@@ -31,6 +31,9 @@ import "./typescriptTransformators/lazy";
 import "./typescriptTransformators/pipeline";
 import "./typescriptTransformators/brand";
 import "./typescriptTransformators/symbol";
+import "./typescriptTransformators/readonly";
+import "./typescriptTransformators/catch";
+import "./typescriptTransformators/nan";
 
 export * from "./ZodToTypescript";
 
