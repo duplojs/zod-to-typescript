@@ -1,0 +1,19 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`literal > bigint 1`] = `"type Zod2ts_6_duplojs = 42;"`;
+
+exports[`literal > boolean 1`] = `"type Zod2ts_2_duplojs = true;"`;
+
+exports[`literal > boolean 2`] = `"type Zod2ts_3_duplojs = false;"`;
+
+exports[`literal > force error 1`] = `"type Zod2ts_8_duplojs = unknown;"`;
+
+exports[`literal > null 1`] = `"type Zod2ts_4_duplojs = null;"`;
+
+exports[`literal > number 1`] = `"type Zod2ts_1_duplojs = 42;"`;
+
+exports[`literal > string 1`] = `"type Zod2ts_0_duplojs = "duplojs";"`;
+
+exports[`literal > symbol 1`] = `"type Zod2ts_7_duplojs = "Symbol(symbol)";"`;
+
+exports[`literal > undefined 1`] = `"type Zod2ts_5_duplojs = undefined;"`;

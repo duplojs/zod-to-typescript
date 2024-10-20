@@ -1,0 +1,3 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`brand 1`] = `"type Zod2ts_0_duplojs = string;"`;
