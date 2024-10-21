@@ -38,9 +38,11 @@
     "dist",
     "README.md"
   ],
+  "dependencies": {
+    "typescript": "5.5.4"
+  },
   "peerDependencies": {
-    "zod": ">=3.23.8 <4.0.0",
-    "typescript": ">=5.5.4 <6.0.0"
+    "zod": ">=3.23.8 <4.0.0"
   },
   "devDependencies": {
     "@commitlint/cli": "19.4.0",

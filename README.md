@@ -22,9 +22,9 @@
 
 ## Installation
 
-To consume `@duplojs/zod-to-typescript`, you need to install the npm package, zod and typescript.
+To consume `@duplojs/zod-to-typescript`, you need to install the npm package and zod.
 ```bash
-npm install @duplojs/zod-to-typescript typescript zod
+npm install @duplojs/zod-to-typescript zod
 ```
 
 ## Usage
@@ -241,7 +241,7 @@ type Post = {
 };
 ```
 
-### 9. hooks
+### 9. Hooks
 Converting a Zod schema to TypeScript requires making choices. Should we generate the type based on the schema's output or the type expected by the schema? Zod-to-Typescript has made these choices, but it doesn't impose them on you. Thanks to the hooks, you can choose your use cases.
 
 ```ts
