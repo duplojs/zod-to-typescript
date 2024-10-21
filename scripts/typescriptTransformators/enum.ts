@@ -1,14 +1,12 @@
-import { TypescriptTransformator, ZodToTypescript } from "@scripts/ZodToTypescript";
-import { type TypeNode, factory } from "typescript";
+import { ZodToTypescript } from "@scripts/ZodToTypescript";
+import { factory } from "typescript";
 import { type ZodEnum } from "zod";
 
-@ZodToTypescript.autoInstance
-export class ZodEnumTypescriptTrasformator implements TypescriptTransformator {
-	public get support() {
-		return ZodToTypescript.zod.ZodEnum;
-	}
-
-	public makeTypeNode(zodSchema: ZodEnum<[string]>): TypeNode {
+ZodToTypescript.typescriptTransformators.push({
+	support(zodSchema) {
+		return zodSchema instanceof ZodToTypescript.zod.ZodEnum;
+	},
+	makeTypeNode(zodSchema: ZodEnum<[string]>) {
 		return factory.createUnionTypeNode(
 			zodSchema._def.values.map(
 				(value: string) => factory.createLiteralTypeNode(
@@ -16,5 +14,5 @@ export class ZodEnumTypescriptTrasformator implements TypescriptTransformator {
 				),
 			),
 		);
-	}
-}
+	},
+});

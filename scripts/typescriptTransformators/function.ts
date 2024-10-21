@@ -1,21 +1,19 @@
-import { type MapContext, TypescriptTransformator, ZodToTypescript } from "@scripts/ZodToTypescript";
-import { type TypeNode, factory, SyntaxKind } from "typescript";
+import { ZodToTypescript } from "@scripts/ZodToTypescript";
+import { factory, SyntaxKind } from "typescript";
 import { type ZodFunction, type ZodTuple, type ZodType } from "zod";
 
-@ZodToTypescript.autoInstance
-export class ZodFunctionTypescriptTrasformator implements TypescriptTransformator {
-	public get support() {
-		return ZodToTypescript.zod.ZodFunction;
-	}
-
-	public makeTypeNode(zodSchema: ZodFunction<ZodTuple<[ZodType]>, ZodType>, context: MapContext): TypeNode {
+ZodToTypescript.typescriptTransformators.push({
+	support(zodSchema) {
+		return zodSchema instanceof ZodToTypescript.zod.ZodFunction;
+	},
+	makeTypeNode(zodSchema: ZodFunction<ZodTuple<[ZodType]>, ZodType>, { findTypescriptTransformator }) {
 		const argTypes = zodSchema._def.args._def.items.map(
 			(arg, index) => factory.createParameterDeclaration(
 				undefined,
 				undefined,
 				factory.createIdentifier(`args_${index}`),
 				undefined,
-				ZodToTypescript.findTypescriptTransformator(arg, context),
+				findTypescriptTransformator(arg),
 			),
 		);
 
@@ -36,7 +34,7 @@ export class ZodFunctionTypescriptTrasformator implements TypescriptTransformato
 		return factory.createFunctionTypeNode(
 			undefined,
 			[...argTypes, ...restArgTypes],
-			ZodToTypescript.findTypescriptTransformator(zodSchema._def.returns, context),
+			findTypescriptTransformator(zodSchema._def.returns),
 		);
-	}
-}
+	},
+});

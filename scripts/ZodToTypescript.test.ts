@@ -1,6 +1,6 @@
 import { ZodToTypescript, type MapContext } from "@scripts/index";
 import type { TypeNode } from "typescript";
-import { z as zod } from "zod";
+import { z as zod, ZodDate, ZodNumber } from "zod";
 
 describe("zodTypescriptTransformator", () => {
 	const commentSchema = zod.object({
@@ -98,5 +98,31 @@ describe("zodTypescriptTransformator", () => {
 		ztt.append(postSchema, "Post");
 
 		expect(ztt.toString()).toMatchSnapshot();
+	});
+
+	it("hooks date to string", () => {
+		const zodSchema = zod.object({
+			prop1: zod.date(),
+			prop2: zod.coerce.number(),
+		});
+
+		const result = ZodToTypescript.convert(
+			zodSchema,
+			{
+				zodSchemaHooks: [
+					(zodSchema, context, output) => output(
+						"next",
+						zodSchema instanceof ZodNumber && zodSchema._def.coerce
+							? zod.number().optional()
+							: zodSchema,
+					),
+					(zodSchema, context, output) => output(
+						"stop",
+						zodSchema instanceof ZodDate ? zod.string() : zodSchema,
+					),
+				],
+			},
+		);
+		expect(result).toMatchSnapshot();
 	});
 });

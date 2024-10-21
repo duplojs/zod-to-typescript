@@ -1,25 +1,35 @@
 import { addComment } from "@scripts/utils/addComment";
-import { type MapContext, TypescriptTransformator, ZodToTypescript } from "@scripts/ZodToTypescript";
+import { ZodToTypescript } from "@scripts/ZodToTypescript";
 import { type TypeNode, factory, SyntaxKind, isUnionTypeNode } from "typescript";
 import type { ZodObject, ZodRawShape, ZodType } from "zod";
 
-@ZodToTypescript.autoInstance
-export class ZodObjectTypescriptTrasformator implements TypescriptTransformator {
-	public get support() {
-		return ZodToTypescript.zod.ZodObject;
+function isUndefinedTypeNode(typeNode: TypeNode): boolean {
+	if (typeNode.kind === SyntaxKind.UndefinedKeyword) {
+		return true;
 	}
 
-	public makeTypeNode(zodSchema: ZodObject<ZodRawShape>, context: MapContext): TypeNode {
+	if (isUnionTypeNode(typeNode)) {
+		return typeNode.types.some((subTypeNode) => isUndefinedTypeNode(subTypeNode));
+	}
+
+	return false;
+}
+
+ZodToTypescript.typescriptTransformators.push({
+	support(zodSchema) {
+		return zodSchema instanceof ZodToTypescript.zod.ZodObject;
+	},
+	makeTypeNode(zodSchema: ZodObject<ZodRawShape>, { findTypescriptTransformator }) {
 		const properties = Object.entries(zodSchema.shape);
 
 		return factory.createTypeLiteralNode(
 			properties.map(([name, subZodSchema]: [string, ZodType]) => {
-				const subTypeNode = ZodToTypescript.findTypescriptTransformator(subZodSchema, context);
+				const subTypeNode = findTypescriptTransformator(subZodSchema);
 
 				const propertyTypeNode = factory.createPropertySignature(
 					undefined,
 					name,
-					ZodObjectTypescriptTrasformator.isUndefinedTypeNode(subTypeNode)
+					isUndefinedTypeNode(subTypeNode)
 						? factory.createToken(SyntaxKind.QuestionToken)
 						: undefined,
 					subTypeNode,
@@ -31,17 +41,5 @@ export class ZodObjectTypescriptTrasformator implements TypescriptTransformator 
 				return propertyTypeNode;
 			}),
 		);
-	}
-
-	private static isUndefinedTypeNode(typeNode: TypeNode): boolean {
-		if (typeNode.kind === SyntaxKind.UndefinedKeyword) {
-			return true;
-		}
-
-		if (isUnionTypeNode(typeNode)) {
-			return typeNode.types.some((subTypeNode) => this.isUndefinedTypeNode(subTypeNode));
-		}
-
-		return false;
-	}
-}
+	},
+});
