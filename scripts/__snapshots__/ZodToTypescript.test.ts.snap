@@ -19,6 +19,13 @@ exports[`zodTypescriptTransformator > export type 1`] = `
 export { Zod2ts_2_duplojs };"
 `;
 
+exports[`zodTypescriptTransformator > hooks date to string 1`] = `
+"type Zod2ts_6_duplojs = {
+    prop1: string;
+    prop2?: number | undefined;
+};"
+`;
+
 exports[`zodTypescriptTransformator > new ZodToTypescript 1`] = `
 "type Comment = {
     user: User;

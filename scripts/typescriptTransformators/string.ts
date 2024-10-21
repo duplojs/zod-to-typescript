@@ -1,13 +1,11 @@
-import { TypescriptTransformator, ZodToTypescript } from "@scripts/ZodToTypescript";
-import { type TypeNode, factory, SyntaxKind } from "typescript";
+import { ZodToTypescript } from "@scripts/ZodToTypescript";
+import { factory, SyntaxKind } from "typescript";
 
-@ZodToTypescript.autoInstance
-export class ZodStringTypescriptTrasformator implements TypescriptTransformator {
-	public get support() {
-		return ZodToTypescript.zod.ZodString;
-	}
-
-	public makeTypeNode(): TypeNode {
+ZodToTypescript.typescriptTransformators.push({
+	support(zodSchema) {
+		return zodSchema instanceof ZodToTypescript.zod.ZodString;
+	},
+	makeTypeNode() {
 		return factory.createKeywordTypeNode(SyntaxKind.StringKeyword);
-	}
-}
+	},
+});
