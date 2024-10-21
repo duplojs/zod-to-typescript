@@ -1,7 +1,7 @@
 <a name="top"></a>
 
 <p align="center">
-  <img src="./docs/assets/logo.png" alt="logo" />
+  <img src="./logo.png" alt="logo" />
 </p>
 <p align="center">
   <span style="font-size: 24px; font-weight: bold;">Zod To Typescript</span>
@@ -11,10 +11,10 @@
     <img src='https://img.shields.io/badge/types-TypeScript-blue?logo=typescript&style=plastic' alt='coverage' />
   </a>
   <a href="#">
-	<img src="https://img.shields.io/badge/coverage-100%25-green?style=plastic" alt="lang">
+    <img src="https://img.shields.io/badge/coverage-100%25-green?style=plastic" alt="lang">
   </a>
   <a href="https://www.npmjs.com/package/@duplojs/zod-to-typescript">
-	<img src="https://img.shields.io/npm/v/@duplojs/zod-to-typescript" alt="lang">
+    <img src="https://img.shields.io/npm/v/@duplojs/zod-to-typescript" alt="lang">
   </a>
 </p>
 
@@ -85,8 +85,8 @@ const schema = zod.object({
 });
 
 const options: ConvertOptions = {
-	name: "User",
-	export: true,
+    name: "User",
+    export: true,
 };
 
 const tsType = ZodToTypescript.convert(schema, options);
@@ -94,9 +94,9 @@ const tsType = ZodToTypescript.convert(schema, options);
 console.log(tsType);
 // Output: 
 export type User = { 
-	name: string; 
-	age: number; 
-	isStudent: boolean; 
+    name: string; 
+    age: number; 
+    isStudent: boolean; 
 };
 ```
 
@@ -185,52 +185,7 @@ export type Category = {
 };
 ```
 
-### 8. Create context
-
-You can create a context to store the identifiers and options for the conversion. This can be useful when you have multiple schemas that reference each other.
-
-```ts
-import { ZodToTypescript } from "@duplojs/zod-to-typescript";
-import { z as zod } from "zod";
-
-const userSchema = zod.object({
-	userId: zod.number(),
-	name: zod.string(),
-});
-
-const context = ZodToTypescript.makeContextFromZodSchema(
-	userSchema,
-	{
-		name: "User",
-	},
-);
-
-const postSchema = zod.object({
-	author: userSchema,
-	title: zod.string(),
-});
-
-const tsType = ZodToTypescript.convert(postSchema, { name: "Post", context });
-
-console.log(tsType);
-// Output:
-type User = {
-    userId: number;
-    name: string;
-};
-
-type Post = {
-    author: User;
-    title: string;
-};
-```
-
-This method allows you to modify or enrich the context before converting it to a TypeScript type declaration.
-
-`ZodToTypescript` is a powerful utility for converting Zod schemas to TypeScript type declarations. By following this guide, you can easily integrate it into your TypeScript projects and extend it to support custom Zod types.
-
-
-### 9. New instance
+### 8. New instance
 You can create instance of `ZodToTypescript` to make an environment types.
 
 ```ts
@@ -238,22 +193,22 @@ import { ZodToTypescript } from "@duplojs/zod-to-typescript";
 import { z as zod } from "zod";
 
 const commentSchema = zod.object({
-	user: zod.lazy<any>(() => userSchema),
-	content: zod.string(),
+    user: zod.lazy<any>(() => userSchema),
+    content: zod.string(),
 }).identifier("Comment");
 
 const postSchema = zod.object({
-	title: zod.string(),
-	content: zod.string(),
-	date: zod.coerce.date(),
-	comments: commentSchema.array(),
+    title: zod.string(),
+    content: zod.string(),
+    date: zod.coerce.date(),
+    comments: commentSchema.array(),
 });
 
 const userSchema = zod.object({
-	userId: zod.number(),
-	firstname: zod.string(),
-	lastname: zod.string(),
-	posts: postSchema.array(),
+    userId: zod.number(),
+    firstname: zod.string(),
+    lastname: zod.string(),
+    posts: postSchema.array(),
 });
 
 const ztt = new ZodToTypescript();
@@ -285,6 +240,47 @@ type Post = {
     comments: Comment[];
 };
 ```
+
+### 9. hooks
+Converting a Zod schema to TypeScript requires making choices. Should we generate the type based on the schema's output or the type expected by the schema? Zod-to-Typescript has made these choices, but it doesn't impose them on you. Thanks to the hooks, you can choose your use cases.
+
+```ts
+import { ZodToTypescript } from "@duplojs/zod-to-typescript";
+import { z as zod } from "zod";
+
+const zodSchema = zod.object({
+    prop1: zod.date(),
+    prop2: zod.number(),
+});
+
+const tsType = ZodToTypescript.convert(
+    zodSchema,
+    {
+		name: "Schema"
+        zodSchemaHooks: [
+            (zodSchema, context, output) => output(
+                "next",
+                zodSchema instanceof ZodNumber && zodSchema._def.coerce
+                    ? zod.number().optional()
+                    : zodSchema,
+            ),
+            (zodSchema, context, output) => output(
+                "stop",
+                zodSchema instanceof ZodDate ? zod.string() : zodSchema,
+            ),
+        ],
+    },
+);
+
+console.log(tsType);
+// Output:
+type Schema = {
+    prop1: string;
+    prop2?: number | undefined;
+};
+```
+
+Hooks are functions that intercept the Zod schema before it looks for its transformer. This allows returning another schema instead. The hook must return the result of the output function. output takes a string as its first argument ("next" or "stop"), which indicates whether the hook execution should stop or continue after it. The second argument corresponds to the schema that will be interpreted.
 
 ### More Examples
 

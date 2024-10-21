@@ -14,20 +14,16 @@ export interface ConvertIdentifier {
 	name: string;
 }
 
-export interface MakeContextOptions {
-	name: string;
-	context?: MapContext;
-}
-
 export interface ConvertOptions {
 	name?: string;
-	context?: MapContext;
 	indentifiers?: (ConvertIdentifier | ZodType)[];
 	export?: boolean;
+	zodSchemaHooks?: ZodSchemaHook[];
 }
 
 export interface FindTypescriptTransformatorOptions {
-	skipDeclarationStatement?: boolean;
+	skipNextDeclarationStatement?: boolean;
+	skipNextZodSchemaHooks?: boolean;
 }
 
 declare module "zod" {
@@ -44,20 +40,122 @@ ZodType.prototype.identifier = function(name) {
 	return this;
 };
 
-export interface TypescriptTransformator {
-	get support(): new (...args: any[]) => ZodType;
-
-	makeTypeNode(zodSchema: ZodType, context: MapContext): TypeNode;
+export interface TypescriptTransformatorTools {
+	context: MapContext;
+	findTypescriptTransformator(zodSchema: ZodType): TypeNode;
 }
+
+export interface TypescriptTransformator {
+	support(zodSchema: ZodType): boolean;
+
+	makeTypeNode(zodSchema: ZodType, tools: TypescriptTransformatorTools): TypeNode;
+}
+
+export type ZodSchemaHookAction = "stop" | "next";
+
+export interface ZodSchemaHookOutput {
+	zodSchema: ZodType;
+	action: ZodSchemaHookAction;
+}
+
+export type ZodSchemaHook = (
+	zodSchema: ZodType,
+	context: MapContext,
+	output: (action: ZodSchemaHookAction, zodSchema: ZodType) => ZodSchemaHookOutput
+) => ZodSchemaHookOutput;
 
 export class ZodToTypescript {
 	public aliasContext: MapContext = new Map();
+
+	public zodSchemaHooks: ZodSchemaHook[] = [];
+
+	public typescriptTransformators: TypescriptTransformator[];
 
 	public static typescriptTransformators: TypescriptTransformator[] = [];
 
 	public static zod = zod;
 
 	private static count = 0;
+
+	public constructor(typescriptTransformators: TypescriptTransformator[] = []) {
+		this.typescriptTransformators = [
+			...typescriptTransformators,
+			...ZodToTypescript.typescriptTransformators,
+		];
+	}
+
+	private findTypescriptTransformator(
+		zodSchema: ZodType,
+		context: MapContext,
+		options: FindTypescriptTransformatorOptions = {},
+	): TypeNode {
+		const { skipNextDeclarationStatement, skipNextZodSchemaHooks, ...currentOptions } = options;
+
+		let currentZodSchema = zodSchema;
+
+		if (!skipNextZodSchemaHooks && this.zodSchemaHooks.length) {
+			for (const zodSchemaHook of this.zodSchemaHooks) {
+				const result = zodSchemaHook(
+					currentZodSchema,
+					context,
+					(action, zodSchema) => ({
+						action,
+						zodSchema,
+					}),
+				);
+
+				currentZodSchema = result.zodSchema;
+
+				if (result.action === "stop") {
+					break;
+				}
+			}
+		}
+
+		const declarationStatement = context.get(currentZodSchema);
+
+		if (!skipNextDeclarationStatement && declarationStatement) {
+			return factory.createTypeReferenceNode(
+				factory.createIdentifier(declarationStatement.name.text),
+			);
+		}
+
+		for (const typescriptTransformator of this.typescriptTransformators) {
+			if (typescriptTransformator.support(currentZodSchema)) {
+				const typeNode = typescriptTransformator.makeTypeNode(
+					currentZodSchema,
+					{
+						context,
+						findTypescriptTransformator: (zodSchema) => this.findTypescriptTransformator(
+							zodSchema,
+							context,
+							currentOptions,
+						),
+					},
+				);
+
+				if (currentZodSchema._identifier) {
+					context.set(
+						currentZodSchema,
+						createTextAlias(typeNode, currentZodSchema._identifier),
+					);
+
+					return this.findTypescriptTransformator(
+						currentZodSchema,
+						context,
+						currentOptions,
+					);
+				}
+
+				return typeNode;
+			}
+		}
+
+		return this.findTypescriptTransformator(
+			zod.unknown(),
+			context,
+		);
+	}
 
 	public append(zodSchema: ZodType, name?: string) {
 		const aliasName = zodSchema._identifier ?? name ?? ZodToTypescript.getIdentifier();
@@ -73,12 +171,25 @@ export class ZodToTypescript {
 
 		[...this.aliasContext.entries()].forEach(
 			([zodSchema, alias]) => {
-				ZodToTypescript.makeContextFromZodSchema(
+				const typeNode = this.findTypescriptTransformator(
 					zodSchema,
-					{
-						name: alias.name.text,
-						context,
-					},
+					context,
+					{ skipNextDeclarationStatement: true },
+				);
+
+				const declaration
+					= (zodSchema._identifier && context.get(zodSchema))
+					|| createTextAlias(typeNode, alias.name.text);
+
+				if (zodSchema.description) {
+					addComment(declaration, zodSchema.description);
+				}
+
+				context.delete(zodSchema);
+
+				context.set(
+					zodSchema,
+					declaration,
 				);
 			},
 		);
@@ -125,90 +236,14 @@ export class ZodToTypescript {
 			.trim();
 	}
 
-	public static findTypescriptTransformator(
-		zodSchema: ZodType,
-		context: MapContext,
-		options: FindTypescriptTransformatorOptions = {},
-	): TypeNode {
-		const { skipDeclarationStatement } = options;
-		const declarationStatement = context.get(zodSchema);
-
-		if (!skipDeclarationStatement && declarationStatement) {
-			return factory.createTypeReferenceNode(
-				factory.createIdentifier(declarationStatement.name.text),
-			);
-		}
-
-		for (const typescriptTransformator of this.typescriptTransformators) {
-			if (zodSchema instanceof typescriptTransformator.support) {
-				const typeNode = typescriptTransformator.makeTypeNode(zodSchema, context);
-
-				if (zodSchema._identifier) {
-					context.set(
-						zodSchema,
-						createTextAlias(typeNode, zodSchema._identifier),
-					);
-
-					return ZodToTypescript
-						.findTypescriptTransformator(
-							zodSchema,
-							context,
-						);
-				}
-
-				return typeNode;
-			}
-		}
-
-		return ZodToTypescript
-			.findTypescriptTransformator(
-				zod.unknown(),
-				context,
-			);
-	}
-
-	public static makeContextFromZodSchema(zodSchema: ZodType, options: MakeContextOptions): MapContext {
-		const context: MapContext = options.context ?? new Map();
-
-		context.set(
-			zodSchema,
-			createTempAlias(options.name),
-		);
-
-		const typeNode = this.findTypescriptTransformator(
-			zodSchema,
-			context,
-			{ skipDeclarationStatement: true },
-		);
-
-		const declaration
-			= (zodSchema._identifier && context.get(zodSchema))
-			|| createTextAlias(typeNode, options.name);
-
-		if (zodSchema.description) {
-			addComment(declaration, zodSchema.description);
-		}
-
-		context.delete(zodSchema);
-
-		context.set(
-			zodSchema,
-			declaration,
-		);
-
-		return context;
-	}
-
 	public static convert(zodSchema: ZodType, options: ConvertOptions = {}): string {
-		const baseContext = new Map(options.context);
+		const ztt = new ZodToTypescript();
+		ztt.zodSchemaHooks = options.zodSchemaHooks ?? [];
 
 		const identifier = options.name ?? this.getIdentifier();
 
 		if (options.indentifiers) {
-			baseContext.set(
-				zodSchema,
-				createTempAlias(identifier),
-			);
+			ztt.aliasContext.set(zodSchema, createTempAlias(identifier));
 
 			options.indentifiers.forEach((indentifier) => {
 				const currentZodSchema = indentifier instanceof ZodType
@@ -223,27 +258,15 @@ export class ZodToTypescript {
 					return;
 				}
 
-				this.makeContextFromZodSchema(
-					currentZodSchema,
-					{
-						name: currentName,
-						context: baseContext,
-					},
-				);
+				ztt.append(currentZodSchema, currentName);
 			});
 
-			baseContext.delete(zodSchema);
+			ztt.aliasContext.delete(zodSchema);
 		}
 
-		this.makeContextFromZodSchema(
-			zodSchema,
-			{
-				name: identifier,
-				context: baseContext,
-			},
-		);
+		ztt.append(zodSchema, identifier);
 
-		return this.stringifyContext(baseContext, !!options?.export);
+		return ztt.toString(options.export);
 	}
 
 	public static getIdentifier() {
@@ -254,11 +277,5 @@ export class ZodToTypescript {
 		Z extends typeof zod,
 	>(zod: Z) {
 		this.zod = zod;
-	}
-
-	public static autoInstance(ZodTypeTypescriptTransformator: new() => TypescriptTransformator) {
-		ZodToTypescript
-			.typescriptTransformators
-			.push(new ZodTypeTypescriptTransformator());
 	}
 }

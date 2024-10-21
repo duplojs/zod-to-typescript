@@ -1,13 +1,11 @@
-import { TypescriptTransformator, ZodToTypescript } from "@scripts/ZodToTypescript";
-import { type TypeNode, factory } from "typescript";
+import { ZodToTypescript } from "@scripts/ZodToTypescript";
+import { factory } from "typescript";
 
-@ZodToTypescript.autoInstance
-export class ZodNullTypescriptTrasformator implements TypescriptTransformator {
-	public get support() {
-		return ZodToTypescript.zod.ZodNull;
-	}
-
-	public makeTypeNode(): TypeNode {
+ZodToTypescript.typescriptTransformators.push({
+	support(zodSchema) {
+		return zodSchema instanceof ZodToTypescript.zod.ZodNull;
+	},
+	makeTypeNode() {
 		return factory.createLiteralTypeNode(factory.createNull());
-	}
-}
+	},
+});

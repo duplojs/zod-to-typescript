@@ -1,14 +1,12 @@
-import { MapContext, TypescriptTransformator, ZodToTypescript } from "@scripts/ZodToTypescript";
-import { type TypeNode, factory } from "typescript";
+import { ZodToTypescript } from "@scripts/ZodToTypescript";
+import { factory } from "typescript";
 import type { EnumLike, ZodNativeEnum } from "zod";
 
-@ZodToTypescript.autoInstance
-export class ZodNativeEnumTypescriptTrasformator implements TypescriptTransformator {
-	public get support() {
-		return ZodToTypescript.zod.ZodNativeEnum;
-	}
-
-	public makeTypeNode(zodSchema: ZodNativeEnum<EnumLike>, context: MapContext): TypeNode {
+ZodToTypescript.typescriptTransformators.push({
+	support(zodSchema) {
+		return zodSchema instanceof ZodToTypescript.zod.ZodNativeEnum;
+	},
+	makeTypeNode(zodSchema: ZodNativeEnum<EnumLike>, { context, findTypescriptTransformator }) {
 		const zodNativeEnumSchema = new ZodToTypescript.zod.ZodNativeEnum(
 			zodSchema._def,
 		);
@@ -31,6 +29,6 @@ export class ZodNativeEnumTypescriptTrasformator implements TypescriptTransforma
 			enumDeclarationStatement,
 		);
 
-		return ZodToTypescript.findTypescriptTransformator(zodSchema, context);
-	}
-}
+		return findTypescriptTransformator(zodSchema);
+	},
+});
