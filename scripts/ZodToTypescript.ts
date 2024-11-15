@@ -35,9 +35,10 @@ declare module "zod" {
 }
 
 ZodType.prototype.identifier = function(name) {
-	this._identifier = name;
+	const cloneSchema = new (this.constructor as new(arg: any) => ZodType)({ ...this._def });
+	cloneSchema._identifier = name;
 
-	return this;
+	return cloneSchema;
 };
 
 export interface TypescriptTransformatorTools {
