@@ -15,7 +15,7 @@ function isUndefinedTypeNode(typeNode: TypeNode): boolean {
 	return false;
 }
 
-function getIdentifier(name: string) {
+function createKeyIdentifier(name: string) {
 	if (/^[a-zA-Z$]+[a-zA-Z0-9_$]*$/.test(name)) {
 		return factory.createIdentifier(name);
 	} else {
@@ -36,7 +36,7 @@ ZodToTypescript.typescriptTransformators.push({
 
 				const propertyTypeNode = factory.createPropertySignature(
 					undefined,
-					getIdentifier(name),
+					createKeyIdentifier(name),
 					isUndefinedTypeNode(subTypeNode)
 						? factory.createToken(SyntaxKind.QuestionToken)
 						: undefined,
