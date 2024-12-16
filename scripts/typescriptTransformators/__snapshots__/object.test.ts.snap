@@ -1,14 +1,5 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`object > good template key 1`] = `
-"type Zod2ts_3_duplojs = {
-    "111": string;
-    "test-1": string;
-    test: string;
-    "test@": string;
-};"
-`;
-
 exports[`object > object 1`] = `
 "type Zod2ts_0_duplojs = {
     name: string;
@@ -28,14 +19,5 @@ exports[`object > object with union undefined 1`] = `
     name: string;
     age: number;
     optional?: undefined | string;
-};"
-`;
-
-exports[`object > object with union undefined 2`] = `
-"type Zod2ts_3_duplojs = {
-    "111": string;
-    "test-1": string;
-    test: string;
-    "test@": string;
 };"
 `;

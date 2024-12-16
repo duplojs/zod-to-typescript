@@ -15,14 +15,6 @@ function isUndefinedTypeNode(typeNode: TypeNode): boolean {
 	return false;
 }
 
-function getIdentifier(name: string) {
-	if (/^[a-zA-Z$]+[a-zA-Z0-9_$]*$/.test(name)) {
-		return factory.createIdentifier(name);
-	} else {
-		return factory.createStringLiteral(name);
-	}
-}
-
 ZodToTypescript.typescriptTransformators.push({
 	support(zodSchema) {
 		return zodSchema instanceof ZodToTypescript.zod.ZodObject;
@@ -36,7 +28,7 @@ ZodToTypescript.typescriptTransformators.push({
 
 				const propertyTypeNode = factory.createPropertySignature(
 					undefined,
-					getIdentifier(name),
+					name,
 					isUndefinedTypeNode(subTypeNode)
 						? factory.createToken(SyntaxKind.QuestionToken)
 						: undefined,
