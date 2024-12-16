@@ -1,5 +1,15 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`object > good template key 1`] = `
+"type Zod2ts_3_duplojs = {
+    "111": string;
+    "test-1": string;
+    test: string;
+    "test@": string;
+    _111: string;
+};"
+`;
+
 exports[`object > object 1`] = `
 "type Zod2ts_0_duplojs = {
     name: string;
