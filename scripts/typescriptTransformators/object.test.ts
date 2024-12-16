@@ -33,4 +33,17 @@ describe("object", () => {
 
 		expect(result).toMatchSnapshot();
 	});
+
+	it("good template key", () => {
+		const result = ZodToTypescript.convert(
+			zod.object({
+				"test-1": zod.string(),
+				test: zod.string(),
+				"test@": zod.string(),
+				111: zod.string(),
+			}),
+		);
+
+		expect(result).toMatchSnapshot();
+	});
 });
