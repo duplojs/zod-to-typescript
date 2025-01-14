@@ -17,6 +17,23 @@ exports[`object > object 1`] = `
 };"
 `;
 
+exports[`object > object with catchAll() 1`] = `
+"type Zod2ts_4_duplojs = {
+    name: string;
+    age: number;
+    optional?: undefined | string;
+    [key: string]: unknown;
+};"
+`;
+
+exports[`object > object with catchAll(z.never()) 1`] = `
+"type Zod2ts_5_duplojs = {
+    name: string;
+    age: number;
+    optional?: undefined | string;
+};"
+`;
+
 exports[`object > object with key optional 1`] = `
 "type Zod2ts_1_duplojs = {
     name: string;

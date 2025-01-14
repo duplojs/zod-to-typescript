@@ -18,6 +18,8 @@ function isUndefinedTypeNode(typeNode: TypeNode): boolean {
 function createKeyIdentifier(name: string) {
 	if (/^[a-zA-Z$_]+[a-zA-Z0-9_$]*$/.test(name)) {
 		return factory.createIdentifier(name);
+	} else if (/^\[.*\]$/.test(name)) {
+		return factory.createIdentifier(name);
 	} else {
 		return factory.createStringLiteral(name);
 	}
@@ -29,6 +31,12 @@ ZodToTypescript.typescriptTransformators.push({
 	},
 	makeTypeNode(zodSchema: ZodObject<ZodRawShape>, { findTypescriptTransformator }) {
 		const properties = Object.entries(zodSchema.shape);
+
+		const catchAll = zodSchema._def.catchall;
+		const catchAllIsNever = catchAll instanceof ZodToTypescript.zod.ZodNever;
+		if (!catchAllIsNever) {
+			properties.push(["[key: string]", catchAll]);
+		}
 
 		return factory.createTypeLiteralNode(
 			properties.map(([name, subZodSchema]: [string, ZodType]) => {
