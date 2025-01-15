@@ -47,4 +47,40 @@ describe("object", () => {
 
 		expect(result).toMatchSnapshot();
 	});
+
+	it("object with catchAll()", () => {
+		const result = ZodToTypescript.convert(
+			zod.object({
+				name: zod.string(),
+				age: zod.number(),
+				optional: zod.union([zod.undefined(), zod.string()]),
+			}).catchall(zod.unknown()),
+		);
+
+		expect(result).toMatchSnapshot();
+	});
+
+	it("object with optional catchAll()", () => {
+		const result = ZodToTypescript.convert(
+			zod.object({
+				name: zod.string(),
+				age: zod.number(),
+				optional: zod.union([zod.undefined(), zod.string()]),
+			}).catchall(zod.string().optional()),
+		);
+
+		expect(result).toMatchSnapshot();
+	});
+
+	it("object with catchAll(z.never())", () => {
+		const result = ZodToTypescript.convert(
+			zod.object({
+				name: zod.string(),
+				age: zod.number(),
+				optional: zod.union([zod.undefined(), zod.string()]),
+			}).catchall(zod.never()),
+		);
+
+		expect(result).toMatchSnapshot();
+	});
 });

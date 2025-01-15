@@ -30,8 +30,8 @@ ZodToTypescript.typescriptTransformators.push({
 	makeTypeNode(zodSchema: ZodObject<ZodRawShape>, { findTypescriptTransformator }) {
 		const properties = Object.entries(zodSchema.shape);
 
-		return factory.createTypeLiteralNode(
-			properties.map(([name, subZodSchema]: [string, ZodType]) => {
+		const propertySignatures = properties
+			.map(([name, subZodSchema]: [string, ZodType]) => {
 				const subTypeNode = findTypescriptTransformator(subZodSchema);
 
 				const propertyTypeNode = factory.createPropertySignature(
@@ -47,7 +47,35 @@ ZodToTypescript.typescriptTransformators.push({
 					addComment(propertyTypeNode, subZodSchema.description);
 				}
 				return propertyTypeNode;
-			}),
-		);
+			});
+
+		const catchAll: ZodType = zodSchema._def.catchall;
+		const catchAllIsNever = catchAll instanceof ZodToTypescript.zod.ZodNever;
+		if (!catchAllIsNever) {
+			const subTypeNode = findTypescriptTransformator(catchAll);
+			const indexSignature = factory.createIndexSignature(
+				undefined,
+				[
+					factory.createParameterDeclaration(
+						undefined,
+						undefined,
+						factory.createIdentifier("key"),
+						isUndefinedTypeNode(subTypeNode)
+							? factory.createToken(SyntaxKind.QuestionToken)
+							: undefined,
+						factory.createKeywordTypeNode(SyntaxKind.StringKeyword),
+						undefined,
+					),
+				],
+				subTypeNode,
+			);
+
+			return factory.createTypeLiteralNode([
+				...propertySignatures,
+				indexSignature,
+			]);
+		}
+
+		return factory.createTypeLiteralNode(propertySignatures);
 	},
 });
