@@ -29,8 +29,11 @@ ZodToTypescript.typescriptTransformators.push({
 	},
 	makeTypeNode(zodSchema: ZodObject<ZodRawShape>, { findTypescriptTransformator }) {
 		const properties = Object.entries(zodSchema.shape);
+		const catchAllSchema: ZodType = zodSchema._def.unknownKeys === "passthrough"
+			? ZodToTypescript.zod.unknown()
+			: zodSchema._def.catchall;
 
-		return factory.createTypeLiteralNode(
+		const objectPropertiesTypeNode = factory.createTypeLiteralNode(
 			properties.map(([name, subZodSchema]: [string, ZodType]) => {
 				const subTypeNode = findTypescriptTransformator(subZodSchema);
 
@@ -49,5 +52,28 @@ ZodToTypescript.typescriptTransformators.push({
 				return propertyTypeNode;
 			}),
 		);
+
+		if (catchAllSchema instanceof ZodToTypescript.zod.ZodNever) {
+			return objectPropertiesTypeNode;
+		} else {
+			return factory.createIntersectionTypeNode([
+				objectPropertiesTypeNode,
+				factory.createTypeLiteralNode([
+					factory.createIndexSignature(
+						undefined,
+						[
+							factory.createParameterDeclaration(
+								undefined,
+								undefined,
+								"key",
+								undefined,
+								factory.createKeywordTypeNode(SyntaxKind.StringKeyword),
+							),
+						],
+						findTypescriptTransformator(catchAllSchema),
+					),
+				]),
+			]);
+		}
 	},
 });

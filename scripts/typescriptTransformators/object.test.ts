@@ -47,4 +47,25 @@ describe("object", () => {
 
 		expect(result).toMatchSnapshot();
 	});
+
+	it("add index signature with value string", () => {
+		const result = ZodToTypescript.convert(
+			zod.object({
+				name: zod.string(),
+			}).catchall(zod.string()),
+		);
+
+		expect(result).toMatchSnapshot();
+	});
+
+	it("passthrough add index signature with value unknown", () => {
+		const result = ZodToTypescript.convert(
+			zod.object({
+				name: zod.string(),
+				age: zod.number(),
+			}).passthrough(),
+		);
+
+		expect(result).toMatchSnapshot();
+	});
 });
