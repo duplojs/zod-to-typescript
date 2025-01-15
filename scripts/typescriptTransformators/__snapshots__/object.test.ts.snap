@@ -1,5 +1,13 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`object > add index signature with value string 1`] = `
+"type Zod2ts_4_duplojs = {
+    name: string;
+} & {
+    [key: string]: string;
+};"
+`;
+
 exports[`object > good template key 1`] = `
 "type Zod2ts_3_duplojs = {
     "111": string;
@@ -29,5 +37,14 @@ exports[`object > object with union undefined 1`] = `
     name: string;
     age: number;
     optional?: undefined | string;
+};"
+`;
+
+exports[`object > passthrough add index signature with value unknown 1`] = `
+"type Zod2ts_5_duplojs = {
+    name: string;
+    age: number;
+} & {
+    [key: string]: unknown;
 };"
 `;
