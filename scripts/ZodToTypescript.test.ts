@@ -1,5 +1,5 @@
-import { ZodToTypescript, type MapContext } from "@scripts/index";
-import type { TypeNode } from "typescript";
+import { ZodToTypescript } from "@scripts/index";
+import { factory } from "typescript";
 import { z as zod, ZodDate, ZodNumber } from "zod";
 
 describe("zodTypescriptTransformator", () => {
@@ -136,5 +136,25 @@ describe("zodTypescriptTransformator", () => {
 			},
 		);
 		expect(result).toMatchSnapshot();
+	});
+
+	it("overrideTypeNode", () => {
+		const zodSchema1 = zod.string().overrideTypeNode(
+			factory.createTypeReferenceNode(factory.createIdentifier("RegExp")),
+		);
+
+		expect(zodSchema1._overrideTypeNode)
+			.toEqual(
+				factory.createTypeReferenceNode(factory.createIdentifier("RegExp")),
+			);
+
+		const zodSchema2 = zod.string().overrideTypeNode(
+			(ts) => ts.factory.createTypeReferenceNode(ts.factory.createIdentifier("Date")),
+		);
+
+		expect(zodSchema2._overrideTypeNode)
+			.toEqual(
+				factory.createTypeReferenceNode(factory.createIdentifier("Date")),
+			);
 	});
 });
