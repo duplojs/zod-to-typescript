@@ -33,16 +33,32 @@ export interface FindTypescriptTransformatorOptions {
 }
 
 declare module "zod" {
-	interface ZodType {
+	interface ZodType<
+		Output = any,
+		Def extends zod.ZodTypeDef = zod.ZodTypeDef,
+		Input = Output,
+	> {
 		_identifier?: string;
-
-		identifier(name: string): this;
+		_overrideTypeNode?: TypeNode;
+		identifier(name: string): ZodType<Output, Def, Input>;
+		overrideTypeNode(
+			typeNode: TypeNode | ((typescript: typeof ts) => TypeNode)
+		): ZodType<Output, Def, Input>;
 	}
 }
 
 ZodType.prototype.identifier = function(name) {
 	const cloneSchema = new (this.constructor as new(arg: any) => ZodType)({ ...this._def });
 	cloneSchema._identifier = name;
+
+	return cloneSchema;
+};
+
+ZodType.prototype.overrideTypeNode = function(typeNode) {
+	const cloneSchema = new (this.constructor as new(arg: any) => ZodType)({ ...this._def });
+	cloneSchema._overrideTypeNode = typeof typeNode === "function"
+		? typeNode(ts)
+		: typeNode;
 
 	return cloneSchema;
 };

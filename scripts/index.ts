@@ -1,3 +1,6 @@
+//priority
+import "./typescriptTransformators/overrideTypeNode";
+
 import "./typescriptTransformators/any";
 import "./typescriptTransformators/undefined";
 import "./typescriptTransformators/null";
