@@ -28,7 +28,7 @@ describe("zodTypescriptTransformator", () => {
 				userSchema,
 				{
 					name: "User",
-					indentifiers: [
+					identifiers: [
 						{
 							name: "Post",
 							zodSchema: postSchema,
@@ -53,7 +53,7 @@ describe("zodTypescriptTransformator", () => {
 		const result = ZodToTypescript.convert(
 			schema,
 			{
-				indentifiers: [schema],
+				identifiers: [schema],
 			},
 		);
 
@@ -121,6 +121,18 @@ describe("zodTypescriptTransformator", () => {
 						zodSchema instanceof ZodDate ? zod.string() : zodSchema,
 					),
 				],
+			},
+		);
+		expect(result).toMatchSnapshot();
+	});
+
+	it("deprecated indentifiers", () => {
+		const schema = zod.string();
+
+		const result = ZodToTypescript.convert(
+			schema,
+			{
+				indentifiers: [schema],
 			},
 		);
 		expect(result).toMatchSnapshot();
