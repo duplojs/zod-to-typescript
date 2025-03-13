@@ -143,7 +143,7 @@ describe("zodTypescriptTransformator", () => {
 			factory.createTypeReferenceNode(factory.createIdentifier("RegExp")),
 		);
 
-		expect(zodSchema1._overrideTypeNode)
+		expect(zodSchema1._zttOverrideTypeNode)
 			.toEqual(
 				factory.createTypeReferenceNode(factory.createIdentifier("RegExp")),
 			);
@@ -152,7 +152,7 @@ describe("zodTypescriptTransformator", () => {
 			(ts) => ts.factory.createTypeReferenceNode(ts.factory.createIdentifier("Date")),
 		);
 
-		expect(zodSchema2._overrideTypeNode)
+		expect(zodSchema2._zttOverrideTypeNode)
 			.toEqual(
 				factory.createTypeReferenceNode(factory.createIdentifier("Date")),
 			);

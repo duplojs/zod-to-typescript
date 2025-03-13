@@ -256,7 +256,7 @@ const zodSchema = zod.object({
 const tsType = ZodToTypescript.convert(
     zodSchema,
     {
-		name: "Schema"
+        name: "Schema"
         zodSchemaHooks: [
             (zodSchema, context, output) => output(
                 "next",
@@ -281,6 +281,34 @@ type Schema = {
 ```
 
 Hooks are functions that intercept the Zod schema before it looks for its transformer. This allows returning another schema instead. The hook must return the result of the output function. output takes a string as its first argument ("next" or "stop"), which indicates whether the hook execution should stop or continue after it. The second argument corresponds to the schema that will be interpreted.
+
+### 10. Override type node
+If you want to make a `zodSchema` give a specific result, you can override its `TypeNode`.
+
+```ts
+import { ZodToTypescript } from "@duplojs/zod-to-typescript";
+import { z as zod } from "zod";
+import { factory } from "typescript";
+
+const zodSchema = zod.string().overrideTypeNode(
+    factory.createTypeReferenceNode(factory.createIdentifier("RegExp")),
+);
+// or
+const zodSchema = zod.string().overrideTypeNode(
+    (ts) => ts.factory.createTypeReferenceNode(ts.factory.createIdentifier("RegExp")),
+);
+
+const tsType = ZodToTypescript.convert(
+    zodSchema,
+    {
+        name: "MySchema"
+    }
+);
+
+console.log(tsType);
+// Output:
+type MySchema = RegExp;
+```
 
 ### More Examples
 

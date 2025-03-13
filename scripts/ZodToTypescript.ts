@@ -1,4 +1,4 @@
-import { ZodType, z as zod } from "zod";
+import { ZodType, type ZodTypeDef, z as zod } from "zod";
 import ts, { type TypeNode, factory, type JSDocContainer, type Declaration, type Identifier } from "typescript";
 import { addComment } from "@utils/addComment";
 import { createTempAlias, createTextAlias } from "./utils/alias";
@@ -38,8 +38,8 @@ declare module "zod" {
 		Def extends zod.ZodTypeDef = zod.ZodTypeDef,
 		Input = Output,
 	> {
-		_identifier?: string;
-		_overrideTypeNode?: TypeNode;
+		_zttIdentifier?: string;
+		_zttOverrideTypeNode?: TypeNode;
 		identifier(name: string): ZodType<Output, Def, Input>;
 		overrideTypeNode(
 			typeNode: TypeNode | ((typescript: typeof ts) => TypeNode)
@@ -48,17 +48,32 @@ declare module "zod" {
 }
 
 ZodType.prototype.identifier = function(name) {
-	const cloneSchema = new (this.constructor as new(arg: any) => ZodType)({ ...this._def });
-	cloneSchema._identifier = name;
+	const ZodTypeConstructor = this.constructor as new(arg: ZodTypeDef) => ZodType;
+	const definition = this._def as ZodTypeDef;
+
+	const cloneSchema = new ZodTypeConstructor({
+		...definition,
+	});
+
+	cloneSchema._zttIdentifier = name;
+	cloneSchema._zttOverrideTypeNode = this._zttOverrideTypeNode;
 
 	return cloneSchema;
 };
 
 ZodType.prototype.overrideTypeNode = function(typeNode) {
-	const cloneSchema = new (this.constructor as new(arg: any) => ZodType)({ ...this._def });
-	cloneSchema._overrideTypeNode = typeof typeNode === "function"
-		? typeNode(ts)
-		: typeNode;
+	const ZodTypeConstructor = this.constructor as new(arg: ZodTypeDef) => ZodType;
+	const definition = this._def as ZodTypeDef;
+
+	const cloneSchema = new ZodTypeConstructor({
+		...definition,
+	});
+
+	cloneSchema._zttIdentifier = this._zttIdentifier;
+	cloneSchema._zttOverrideTypeNode
+		= typeof typeNode === "function"
+			? typeNode(ts)
+			: typeNode;
 
 	return cloneSchema;
 };
@@ -157,10 +172,10 @@ export class ZodToTypescript {
 					},
 				);
 
-				if (currentZodSchema._identifier) {
+				if (currentZodSchema._zttIdentifier) {
 					context.set(
 						currentZodSchema,
-						createTextAlias(typeNode, currentZodSchema._identifier),
+						createTextAlias(typeNode, currentZodSchema._zttIdentifier),
 					);
 
 					return this.findTypescriptTransformator(
@@ -181,7 +196,7 @@ export class ZodToTypescript {
 	}
 
 	public append(zodSchema: ZodType, name?: string) {
-		const aliasName = zodSchema._identifier ?? name ?? ZodToTypescript.getIdentifier();
+		const aliasName = zodSchema._zttIdentifier ?? name ?? ZodToTypescript.getIdentifier();
 
 		this.aliasContext.set(
 			zodSchema,
@@ -201,7 +216,7 @@ export class ZodToTypescript {
 				);
 
 				const declaration
-					= (zodSchema._identifier && context.get(zodSchema))
+					= (zodSchema._zttIdentifier && context.get(zodSchema))
 					|| createTextAlias(typeNode, alias.name.text);
 
 				if (zodSchema.description) {

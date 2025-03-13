@@ -13,7 +13,7 @@ ZodToTypescript.typescriptTransformators.push({
 
 		const enumDeclarationStatement = factory.createEnumDeclaration(
 			[],
-			zodSchema._identifier ?? ZodToTypescript.getIdentifier(),
+			zodSchema._zttIdentifier ?? ZodToTypescript.getIdentifier(),
 			Object.entries(zodSchema.enum).map(
 				([key, value]) => factory.createEnumMember(
 					key,
