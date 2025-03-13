@@ -1,4 +1,4 @@
-import typescript from '@rollup/plugin-typescript';
+import typescript from "@rollup/plugin-typescript";
 import { defineConfig } from "rollup";
 
 export default defineConfig({
