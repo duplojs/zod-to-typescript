@@ -8,4 +8,4 @@ wip:
   - "**/*"
   
 md:
-  - "README.md"
+  - "*.md"

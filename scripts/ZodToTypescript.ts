@@ -16,7 +16,13 @@ export interface ConvertIdentifier {
 
 export interface ConvertOptions {
 	name?: string;
+	context?: MapContext;
+
+	/**
+	 * @deprecated careless mistake in the name - use `identifiers` instead
+	 */
 	indentifiers?: (ConvertIdentifier | ZodType)[];
+	identifiers?: (ConvertIdentifier | ZodType)[];
 	export?: boolean;
 	zodSchemaHooks?: ZodSchemaHook[];
 }
@@ -238,15 +244,20 @@ export class ZodToTypescript {
 	}
 
 	public static convert(zodSchema: ZodType, options: ConvertOptions = {}): string {
+		if (options.indentifiers && !options.identifiers) {
+			console.warn("ZodToTypescript: indentifiers is deprecated, use identifiers instead");
+			options.identifiers = options.indentifiers;
+		}
+
 		const ztt = new ZodToTypescript();
 		ztt.zodSchemaHooks = options.zodSchemaHooks ?? [];
 
 		const identifier = options.name ?? this.getIdentifier();
 
-		if (options.indentifiers) {
+		if (options.identifiers) {
 			ztt.aliasContext.set(zodSchema, createTempAlias(identifier));
 
-			options.indentifiers.forEach((indentifier) => {
+			options.identifiers.forEach((indentifier) => {
 				const currentZodSchema = indentifier instanceof ZodType
 					? indentifier
 					: indentifier.zodSchema;

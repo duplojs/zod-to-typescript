@@ -130,7 +130,7 @@ const employeeSchema = zod.object({
 // Convert the Employee schema to TypeScript
 const options: ConvertOptions = {
     name: "Employee",
-    indentifiers: [
+    identifiers: [
         {
             name: "Address", // define manually
             zodSchema: addressSchema,

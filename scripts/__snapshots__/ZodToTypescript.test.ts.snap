@@ -13,6 +13,8 @@ exports[`zodTypescriptTransformator > comment type 1`] = `
 type Zod2ts_4_duplojs = number;"
 `;
 
+exports[`zodTypescriptTransformator > deprecated indentifiers 1`] = `"type Zod2ts_7_duplojs = string;"`;
+
 exports[`zodTypescriptTransformator > export type 1`] = `
 "type Zod2ts_2_duplojs = string;
 
