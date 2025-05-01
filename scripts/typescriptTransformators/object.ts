@@ -1,27 +1,9 @@
 import { addComment } from "@scripts/utils/addComment";
+import { createKeyIdentifier } from "@scripts/utils/createKeyIdentifier";
+import { includesUndefinedTypeNode } from "@scripts/utils/includesUndefinedTypeNode";
 import { ZodToTypescript } from "@scripts/ZodToTypescript";
-import { type TypeNode, factory, SyntaxKind, isUnionTypeNode } from "typescript";
+import { factory, SyntaxKind } from "typescript";
 import type { ZodObject, ZodRawShape, ZodType } from "zod";
-
-function isUndefinedTypeNode(typeNode: TypeNode): boolean {
-	if (typeNode.kind === SyntaxKind.UndefinedKeyword) {
-		return true;
-	}
-
-	if (isUnionTypeNode(typeNode)) {
-		return typeNode.types.some((subTypeNode) => isUndefinedTypeNode(subTypeNode));
-	}
-
-	return false;
-}
-
-function createKeyIdentifier(name: string) {
-	if (/^[a-zA-Z$_]+[a-zA-Z0-9_$]*$/.test(name)) {
-		return factory.createIdentifier(name);
-	} else {
-		return factory.createStringLiteral(name);
-	}
-}
 
 ZodToTypescript.typescriptTransformators.push({
 	support(zodSchema) {
@@ -40,7 +22,7 @@ ZodToTypescript.typescriptTransformators.push({
 				const propertyTypeNode = factory.createPropertySignature(
 					undefined,
 					createKeyIdentifier(name),
-					isUndefinedTypeNode(subTypeNode)
+					includesUndefinedTypeNode(subTypeNode)
 						? factory.createToken(SyntaxKind.QuestionToken)
 						: undefined,
 					subTypeNode,
