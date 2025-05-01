@@ -5,3 +5,5 @@ exports[`record > <enum, string> 1`] = `"type Zod2ts_2_duplojs = Record<"toto" |
 exports[`record > <number, string> 1`] = `"type Zod2ts_0_duplojs = Record<number, string>;"`;
 
 exports[`record > <string, string> 1`] = `"type Zod2ts_1_duplojs = Record<string, string>;"`;
+
+exports[`record > <string?, string | undefined> 1`] = `"type Zod2ts_3_duplojs = Partial<Record<string, string | undefined>>;"`;

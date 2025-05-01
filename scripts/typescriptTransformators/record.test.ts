@@ -25,4 +25,12 @@ describe("record", () => {
 
 		expect(result).toMatchSnapshot();
 	});
+
+	it("<string?, string | undefined>", () => {
+		const result = ZodToTypescript.convert(
+			zod.record(zod.string().optional()),
+		);
+
+		expect(result).toMatchSnapshot();
+	});
 });
