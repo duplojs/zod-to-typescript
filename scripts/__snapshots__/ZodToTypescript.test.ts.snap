@@ -49,6 +49,39 @@ type Post = {
 };"
 `;
 
+exports[`zodTypescriptTransformator > recurcive inside Schema 1`] = `
+"type user = {
+    userId: number;
+    firstname: string;
+    lastname: string;
+    posts: {
+        title: string;
+        content: string;
+        date: Date;
+        comments: Comment[];
+    }[];
+};
+
+type Comment = {
+    user: {
+        userId: number;
+        firstname: string;
+        lastname: string;
+        posts: {
+            title: string;
+            content: string;
+            date: Date;
+            comments: Comment[];
+        }[];
+    };
+    content: string;
+};
+
+type Zod2ts_9_duplojs = {
+    user: user;
+};"
+`;
+
 exports[`zodTypescriptTransformator > something that is not a schema 1`] = `"type Zod2ts_3_duplojs = unknown;"`;
 
 exports[`zodTypescriptTransformator > with identifier 1`] = `
