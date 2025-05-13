@@ -157,4 +157,14 @@ describe("zodTypescriptTransformator", () => {
 				factory.createTypeReferenceNode(factory.createIdentifier("Date")),
 			);
 	});
+
+	it("recurcive inside Schema", () => {
+		const result = ZodToTypescript.convert(
+			zod.object({
+				user: userSchema.identifier("user"),
+			}),
+		);
+
+		expect(result).toMatchSnapshot();
+	});
 });

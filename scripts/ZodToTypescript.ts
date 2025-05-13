@@ -160,6 +160,13 @@ export class ZodToTypescript {
 
 		for (const typescriptTransformator of this.typescriptTransformators) {
 			if (typescriptTransformator.support(currentZodSchema)) {
+				if (currentZodSchema._zttIdentifier) {
+					context.set(
+						currentZodSchema,
+						createTempAlias(currentZodSchema._zttIdentifier),
+					);
+				}
+
 				const typeNode = typescriptTransformator.makeTypeNode(
 					currentZodSchema,
 					{
